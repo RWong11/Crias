@@ -58,7 +58,7 @@ public class AccordionRootItem extends AccordionItem {
      */
     @Override
     public ImageIcon getDefaultNormalIcon() {
-        return new ImageIcon(this.getClass().getResource("resources/list_plus.png"));
+        return new ImageIcon(this.getClass().getResource("resources/blu_arrow_right.png"));
     }
 
     /**
@@ -67,7 +67,7 @@ public class AccordionRootItem extends AccordionItem {
      */
     @Override
     public ImageIcon getDefaultSelectedIcon() {
-        return new ImageIcon(this.getClass().getResource("resources/list_minus.png"));
+        return new ImageIcon(this.getClass().getResource("resources/blu_arrow_down.png"));
     }
 
     /**

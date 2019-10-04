@@ -64,7 +64,7 @@ public class AccordionLeafItem extends AccordionItem {
      */
     @Override
     public ImageIcon getDefaultNormalIcon() {
-        return new ImageIcon(this.getClass().getResource("resources/default_item.png"));
+        return new ImageIcon(this.getClass().getResource("resources/circle_grey.png"));
     }
 
     /**
@@ -73,7 +73,7 @@ public class AccordionLeafItem extends AccordionItem {
      */
     @Override
     public ImageIcon getDefaultSelectedIcon() {
-        return new ImageIcon(this.getClass().getResource("resources/selected_item.png"));
+        return new ImageIcon(this.getClass().getResource("resources/circle_red.png"));
     }
 
     /**

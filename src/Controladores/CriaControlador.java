@@ -1,5 +1,5 @@
 package Controladores;
 
-public class CriaControlador {
+public class CriaControlador extends Controlador {
 	
 }
