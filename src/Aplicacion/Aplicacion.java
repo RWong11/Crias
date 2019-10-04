@@ -5,6 +5,12 @@ import java.awt.GridBagLayout;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 
+import com.teamdev.jxbrowser.browser.Browser;
+import com.teamdev.jxbrowser.engine.Engine;
+import com.teamdev.jxbrowser.engine.EngineOptions;
+import com.teamdev.jxbrowser.engine.RenderingMode;
+import com.teamdev.jxbrowser.view.swing.BrowserView;
+
 import Controladores.AplicacionControlador;
 import b4.advancedgui.menu.*;
 
@@ -44,6 +50,7 @@ public class Aplicacion extends JFrame {
         panel.add(vista, c);
         
         add(panel);
+        abrirVista();
         pack();
 	}
 	
@@ -59,6 +66,19 @@ public class Aplicacion extends JFrame {
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
+	}
+	
+	public void abrirVista() {
+		EngineOptions options = EngineOptions.newBuilder(RenderingMode.HARDWARE_ACCELERATED).licenseKey(Configuraciones.licencia).build();
+		Engine engine = Engine.newInstance(options);
+			 
+		// Create the Browser
+		Browser browser = engine.newBrowser();
+		BrowserView view = BrowserView.newInstance(browser);
+
+		vista.add(view);
+		 
+		browser.navigation().loadUrl("https://www.google.com");
 	}
 	
 	public static void main(String[] args) {
