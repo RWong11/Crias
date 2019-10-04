@@ -1,12 +1,9 @@
 package Aplicacion;
-import java.awt.Color;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
 
 import Controladores.AplicacionControlador;
 import b4.advancedgui.menu.*;
@@ -25,8 +22,8 @@ public class Aplicacion extends JFrame {
 		JPanel cont = new JPanel();
 
         cont.setBackground(new java.awt.Color(153, 153, 153));
-        cont.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
-        cont.setLayout(new javax.swing.BoxLayout(cont, javax.swing.BoxLayout.LINE_AXIS));
+        cont.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+        cont.setLayout(new BoxLayout(cont, BoxLayout.LINE_AXIS));
         
         menu = new AccordionMenu();
         Configuraciones.crearEstructuraMenu(menu);
