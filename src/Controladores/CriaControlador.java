@@ -5,10 +5,13 @@ import java.util.List;
 
 import com.google.gson.Gson;
 
-public class CriaControlador extends Controlador {
-	public void print(String message) {
-        System.out.println(message);
-    }
+import Aplicacion.Aplicacion;
+
+public class CriaControlador extends AplControlador {
+	
+	public CriaControlador(Aplicacion aplicacion) {
+		super(aplicacion);
+	}
 	
 	public String cargarLista(int n) {
 		List<SelectItem> lista = new ArrayList<SelectItem>();
@@ -16,6 +19,10 @@ public class CriaControlador extends Controlador {
 		lista.add(new SelectItem(2, "Azul"));
 		lista.add(new SelectItem(5, "Verde"));
 		return new Gson().toJson(lista);
+	}
+	
+	public String toString() {
+		return "Crias";
 	}
 }
 

@@ -7,25 +7,17 @@ import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
 
 import com.kingaspx.util.BrowserUtil;
 import com.kingaspx.version.Version;
 import com.teamdev.jxbrowser.chromium.Browser;
-import com.teamdev.jxbrowser.chromium.JSValue;
-import com.teamdev.jxbrowser.chromium.events.ConsoleEvent;
-import com.teamdev.jxbrowser.chromium.events.ConsoleListener;
-import com.teamdev.jxbrowser.chromium.events.FinishLoadingEvent;
-import com.teamdev.jxbrowser.chromium.events.LoadAdapter;
-import com.teamdev.jxbrowser.chromium.events.ScriptContextAdapter;
-import com.teamdev.jxbrowser.chromium.events.ScriptContextEvent;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 
-import Controladores.AplicacionControlador;
-import Controladores.CriaControlador;
-import b4.advancedgui.menu.*;
+import Controladores.*;
 
 public class Aplicacion extends JFrame {
+	private Browser browser;
+    private BrowserView browserView;
 	private JPanel menu;
 	private JPanel vista;
 	
@@ -36,6 +28,9 @@ public class Aplicacion extends JFrame {
 	
 	public void inicializarComponentes() {
 		BrowserUtil.setVersion(Version.V6_22);
+		browser = new Browser();
+        browserView = new BrowserView(browser);
+		
 		JPanel panel = new JPanel(new GridBagLayout());
 		menu = new JPanel(new BorderLayout());
         vista = new JPanel(new BorderLayout());
@@ -50,104 +45,59 @@ public class Aplicacion extends JFrame {
         panel.add(vista, c);
         
         add(panel);
-        abrirMenu();
-        abrirVista();
+        cargarMenu();
+        cargarVista("registro", new CriaControlador(this));
+        JButton btn = new JButton("Actualizar");
+        btn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				System.out.println(browser.getURL());
+				browser.loadURL(browser.getURL());
+			}
+        	
+        });
+
+        this.vista.add(btn, BorderLayout.NORTH);
+        this.vista.add(browserView, BorderLayout.CENTER);
         pack();
 	}
 	
-    public void setMouseAdapter(AccordionMenu menu) {
-        for (AccordionLeafItem leaf : menu.getAllLeafs()) {
-            leaf.addMouseListener(new AplicacionControlador());
-        }
-    }
-	
 	public void abrirFrame() {
-		setTitle("Crias");
+		setTitle("Corrales Ternero");
 		setSize(1000, 700);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 	}
 	
-	public void abrirMenu() {
-        Browser browser = new Browser();
+	public void cargarVista(String vista, AplControlador controlador) {
+		if(controlador == null) {
+			//panel.add(new JLabel("No se encontro el controlador para la vista: " +vista), BorderLayout.CENTER);
+			System.out.println("no controller found");
+			revalidate();
+			repaint();
+			return;
+		}
+		System.out.println("hi2"); 
+        browser.addScriptContextListener(controlador);
+        browser.addConsoleListener(controlador);
+        
+        browser.loadURL(new File("src/Vistas/"+controlador+"/"+vista+".html").getAbsolutePath());
+        //validate();
+        System.out.println(browser.getURL());
+	}
+	
+	public void cargarMenu() {
+		Browser browser = new Browser();
         BrowserView browserView = new BrowserView(browser);
+	        
+        AplControlador controlador = new AplControlador(this);
+        browser.addScriptContextListener(controlador);
+        browser.addConsoleListener(controlador);
         
-        browser.addScriptContextListener(new ScriptContextAdapter() {
-            @Override
-            public void onScriptContextCreated(ScriptContextEvent event) {
-                Browser browser = event.getBrowser();
-                JSValue window = browser.executeJavaScriptAndReturnValue("window");
-                window.asObject().setProperty("java", new CriaControlador());
-            }
-        });
-        
-        browser.addConsoleListener(new ConsoleListener() {
-            public void onMessage(ConsoleEvent event) {
-                System.out.println(event.getLevel()+": "+event.getMessage());
-            }
-        });
-
         browser.loadURL(new File("src/Vistas/menu.html").getAbsolutePath());
-        
-        JButton btn = new JButton("Actualizar");
-        btn.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				browser.loadURL(browser.getURL());
-			}
-        	
-        });
-        
-        menu.add(btn, BorderLayout.NORTH);
         menu.add(browserView, BorderLayout.CENTER);
-    }
-	
-	public void abrirVista() {
-        Browser browser = new Browser();
-        BrowserView browserView = new BrowserView(browser);
+	}
 
-        browser.addLoadListener(new LoadAdapter() {
-            @Override
-            public void onFinishLoadingFrame(FinishLoadingEvent event) {
-                if (event.isMainFrame()) {
-                    System.out.println("HTML is loaded.");
-                }
-            }
-        });
-        
-        browser.addScriptContextListener(new ScriptContextAdapter() {
-            @Override
-            public void onScriptContextCreated(ScriptContextEvent event) {
-                Browser browser = event.getBrowser();
-                JSValue window = browser.executeJavaScriptAndReturnValue("window");
-                window.asObject().setProperty("java", new CriaControlador());
-            }
-        });
-        
-        browser.addConsoleListener(new ConsoleListener() {
-            public void onMessage(ConsoleEvent event) {
-                System.out.println(event.getLevel()+": "+event.getMessage());
-            }
-        });
-
-        browser.loadURL(new File("src/Vistas/menu.html").getAbsolutePath());
-        
-        JButton btn = new JButton("Actualizar");
-        btn.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				browser.loadURL(browser.getURL());
-			}
-        	
-        });
-        
-        vista.add(btn, BorderLayout.NORTH);
-        vista.add(browserView, BorderLayout.CENTER);
-    }
-	
 	public static void main(String[] args) {
 		new Aplicacion();
 	}
