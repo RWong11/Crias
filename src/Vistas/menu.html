@@ -17,8 +17,8 @@
             </div>
             <ul class="list-unstyled components">
                 <li>
-                    <a href="#homeSubmenu" data-toggle="collapse" class="dropdown-toggle">Crias</a>
-                    <ul class="collapse list-unstyled" id="homeSubmenu" data-controlador="Crias" data-parent="#accordion">
+                    <a href="#criasSubmenu" data-toggle="collapse" class="dropdown-toggle"><i class="fa fa-paw"></i> Crias</a>
+                    <ul class="collapse list-unstyled" id="criasSubmenu" data-controlador="Crias" data-parent="#accordion">
                         <li><a href="#" data-vista="index">Consultar</a></li>
                         <li><a href="#" data-vista="registro">Registrar</a></li>
                     </ul>
@@ -45,13 +45,15 @@ $(document).ready(function () {
 		
 		if(href == "#Salir")
 			window.java.salir();
-		
-		var vista = $(this).data('vista');
-		var controlador = $(this).parent().parent().data('controlador');
-		
-		if(vista && controlador) {
-			//$(this).addClass("active");
-			window.java.cargarVista(vista, controlador);
+		else {
+			var vista = $(this).data('vista');
+			var controlador = $(this).parent().parent().data('controlador');
+			
+			if(vista && controlador) {
+				$("a.active").removeClass("active");
+				$(this).addClass("active");
+				window.java.cargarVista(vista, controlador);
+			}
 		}
 	})
 });

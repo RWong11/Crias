@@ -2,6 +2,7 @@ package Controladores;
 
 import javax.swing.JOptionPane;
 
+import com.google.gson.Gson;
 import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.JSValue;
 import com.teamdev.jxbrowser.chromium.events.ConsoleEvent;
@@ -10,6 +11,7 @@ import com.teamdev.jxbrowser.chromium.events.ScriptContextAdapter;
 import com.teamdev.jxbrowser.chromium.events.ScriptContextEvent;
 
 import Aplicacion.Aplicacion;
+import Modelos.GlobalModelo;
 
 public class AplControlador extends ScriptContextAdapter implements ConsoleListener {
 	Aplicacion aplicacion;
@@ -47,5 +49,10 @@ public class AplControlador extends ScriptContextAdapter implements ConsoleListe
 		
 		if(input == 0)
 			System.exit(0);
+	}
+	
+	public String cargarLista(int n) {
+		String json = new Gson().toJson(new GlobalModelo().cargarLista(n));
+		return json;
 	}
 }

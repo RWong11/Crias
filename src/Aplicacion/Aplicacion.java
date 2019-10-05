@@ -24,6 +24,38 @@ public class Aplicacion extends JFrame {
 		abrirFrame();
 	}
 	
+	public void abrirFrame() {
+		setTitle("Corrales Ternero");
+		setSize(1000, 700);
+		setLocationRelativeTo(null);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setVisible(true);
+	}
+	
+	public void cargarVista(String vista, AplControlador controlador) {
+		File file = new File("src/Vistas/"+controlador+"/"+vista+".html");
+		
+		if(file.exists()) {
+			browser.addScriptContextListener(controlador);
+	        browser.addConsoleListener(controlador);
+	        browser.loadURL(file.getAbsolutePath());
+		}
+		else
+			browser.loadURL(new File("src/Vistas/error.html").getAbsolutePath());
+	}
+	
+	public void cargarMenu() {
+		Browser browser = new Browser();
+        BrowserView browserView = new BrowserView(browser);
+	        
+        AplControlador controlador = new AplControlador(this);
+        browser.addScriptContextListener(controlador);
+        browser.addConsoleListener(controlador);
+        
+        browser.loadURL(new File("src/Vistas/menu.html").getAbsolutePath());
+        menu.add(browserView, BorderLayout.CENTER);
+	}
+
 	public void inicializarComponentes() {
 		BrowserUtil.setVersion(Version.V6_22);
 		browser = new Browser();
@@ -49,37 +81,6 @@ public class Aplicacion extends JFrame {
         pack();
 	}
 	
-	public void abrirFrame() {
-		setTitle("Corrales Ternero");
-		setSize(1000, 700);
-		setLocationRelativeTo(null);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setVisible(true);
-	}
-	
-	public void cargarVista(String vista, AplControlador controlador) {
-		if(controlador == null) {
-			browser.loadURL(new File("src/Vistas/error.html").getAbsolutePath());
-			return;
-		}
-
-        browser.addScriptContextListener(controlador);
-        browser.addConsoleListener(controlador);
-        browser.loadURL(new File("src/Vistas/"+controlador+"/"+vista+".html").getAbsolutePath());
-	}
-	
-	public void cargarMenu() {
-		Browser browser = new Browser();
-        BrowserView browserView = new BrowserView(browser);
-	        
-        AplControlador controlador = new AplControlador(this);
-        browser.addScriptContextListener(controlador);
-        browser.addConsoleListener(controlador);
-        
-        browser.loadURL(new File("src/Vistas/menu.html").getAbsolutePath());
-        menu.add(browserView, BorderLayout.CENTER);
-	}
-
 	public static void main(String[] args) {
 		new Aplicacion();
 	}
