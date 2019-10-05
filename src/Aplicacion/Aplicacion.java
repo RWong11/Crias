@@ -2,8 +2,6 @@ package Aplicacion;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.*;
@@ -47,17 +45,7 @@ public class Aplicacion extends JFrame {
         add(panel);
         cargarMenu();
         cargarVista("registro", new CriaControlador(this));
-        JButton btn = new JButton("Actualizar");
-        btn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				System.out.println(browser.getURL());
-				browser.loadURL(browser.getURL());
-			}
-        	
-        });
-
-        this.vista.add(btn, BorderLayout.NORTH);
-        this.vista.add(browserView, BorderLayout.CENTER);
+        vista.add(browserView, BorderLayout.CENTER);
         pack();
 	}
 	
@@ -71,19 +59,13 @@ public class Aplicacion extends JFrame {
 	
 	public void cargarVista(String vista, AplControlador controlador) {
 		if(controlador == null) {
-			//panel.add(new JLabel("No se encontro el controlador para la vista: " +vista), BorderLayout.CENTER);
-			System.out.println("no controller found");
-			revalidate();
-			repaint();
+			browser.loadURL(new File("src/Vistas/error.html").getAbsolutePath());
 			return;
 		}
-		System.out.println("hi2"); 
+
         browser.addScriptContextListener(controlador);
         browser.addConsoleListener(controlador);
-        
         browser.loadURL(new File("src/Vistas/"+controlador+"/"+vista+".html").getAbsolutePath());
-        //validate();
-        System.out.println(browser.getURL());
 	}
 	
 	public void cargarMenu() {
