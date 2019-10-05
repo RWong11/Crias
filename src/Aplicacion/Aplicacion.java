@@ -35,6 +35,7 @@ public class Aplicacion extends JFrame {
 	}
 	
 	public void inicializarComponentes() {
+		BrowserUtil.setVersion(Version.V6_22);
 		JPanel panel = new JPanel(new GridBagLayout());
 		menu = new JPanel(new BorderLayout());
         vista = new JPanel(new BorderLayout());
@@ -49,7 +50,6 @@ public class Aplicacion extends JFrame {
         panel.add(vista, c);
         
         add(panel);
-        BrowserUtil.setVersion(Version.V6_22);
         abrirMenu();
         abrirVista();
         pack();
@@ -95,7 +95,6 @@ public class Aplicacion extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("holax");
 				browser.loadURL(browser.getURL());
 			}
         	
@@ -133,14 +132,13 @@ public class Aplicacion extends JFrame {
             }
         });
 
-        browser.loadURL(new File("src/Vistas/Crias/registro.html").getAbsolutePath());
+        browser.loadURL(new File("src/Vistas/menu.html").getAbsolutePath());
         
         JButton btn = new JButton("Actualizar");
         btn.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("holax");
 				browser.loadURL(browser.getURL());
 			}
         	
