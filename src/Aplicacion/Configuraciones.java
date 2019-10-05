@@ -5,8 +5,7 @@ import java.awt.Font;
 
 import b4.advancedgui.menu.AccordionMenu;
 
-public final class Configuraciones {
-	public static final String licencia = "1BNDHFSC1FT9UH5ZESOBF3O6U0WV7EWVAMFIILKJH40K57J3DRUKE1182LM7BG8WZHYKL1"; 
+public final class Configuraciones { 
 	
 	public static void crearEstructuraMenu(AccordionMenu target) {
         target.addNewMenu("menu1", "Crias");
