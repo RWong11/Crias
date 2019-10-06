@@ -44,7 +44,7 @@ $(document).ready(function () {
 		var href = $(this).attr('href');
 		
 		if(href == "#Salir")
-			window.java.salir();
+			window.java.salir(0);
 		else {
 			var vista = $(this).data('vista');
 			var controlador = $(this).parent().parent().data('controlador');

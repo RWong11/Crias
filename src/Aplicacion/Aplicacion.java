@@ -9,6 +9,8 @@ import javax.swing.*;
 import com.kingaspx.util.BrowserUtil;
 import com.kingaspx.version.Version;
 import com.teamdev.jxbrowser.chromium.Browser;
+import com.teamdev.jxbrowser.chromium.events.ConsoleEvent;
+import com.teamdev.jxbrowser.chromium.events.ConsoleListener;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 
 import Controladores.*;
@@ -18,6 +20,7 @@ public class Aplicacion extends JFrame {
     private BrowserView browserView;
 	private JPanel menu;
 	private JPanel vista;
+	private AplControlador controlador;
 	
 	public Aplicacion() {
 		inicializarComponentes();
@@ -34,12 +37,10 @@ public class Aplicacion extends JFrame {
 	
 	public void cargarVista(String vista, AplControlador controlador) {
 		File file = new File("src/Vistas/"+controlador+"/"+vista+".html");
-		
-		if(file.exists()) {
-			browser.addScriptContextListener(controlador);
-	        browser.addConsoleListener(controlador);
+		browser.removeScriptContextListener(this.controlador);
+		browser.addScriptContextListener(controlador);
+		if(file.exists())
 	        browser.loadURL(file.getAbsolutePath());
-		}
 		else
 			browser.loadURL(new File("src/Vistas/error.html").getAbsolutePath());
 	}
@@ -47,21 +48,35 @@ public class Aplicacion extends JFrame {
 	public void cargarMenu() {
 		Browser browser = new Browser();
         BrowserView browserView = new BrowserView(browser);
-	        
-        AplControlador controlador = new AplControlador(this);
-        browser.addScriptContextListener(controlador);
-        browser.addConsoleListener(controlador);
-        
+
+        browser.addScriptContextListener(new AplControlador(this));
         browser.loadURL(new File("src/Vistas/menu.html").getAbsolutePath());
         menu.add(browserView, BorderLayout.CENTER);
 	}
 
+	public void mostrarSalir() {
+		String prueba = "Swal.fire({" + 
+				"  title: 'Salir'," + 
+				"  text: '¿Esta seguro que desea salir de la aplicación?'," + 
+				"  type: 'warning'," + 
+				"  showCancelButton: true," + 
+				"  cancelButtonColor: '#d33'," + 
+				"  cancelButtonText: 'Cancelar'," + 
+				"  confirmButtonText: 'Si'" + 
+				"}).then((result) => {" + 
+				"  if (result.value) {" + 
+				"    window.java.salir(1) " +
+				"  }" + 
+				"})";
+		browser.executeJavaScript(prueba);
+	}
+	
 	public void inicializarComponentes() {
 		BrowserUtil.setVersion(Version.V6_22);
 		browser = new Browser();
         browserView = new BrowserView(browser);
 		
-		JPanel panel = new JPanel(new GridBagLayout());
+		setLayout(new GridBagLayout());
 		menu = new JPanel(new BorderLayout());
         vista = new JPanel(new BorderLayout());
 
@@ -70,13 +85,20 @@ public class Aplicacion extends JFrame {
         c.fill = GridBagConstraints.BOTH;
         c.gridy = 0;
         c.weighty = 1;
-        panel.add(menu, c);
+        add(menu, c);
         c.weightx = 4.0;
-        panel.add(vista, c);
-        
-        add(panel);
+        add(vista, c);
+
         cargarMenu();
-        cargarVista("registro", new CriaControlador(this));
+        controlador = new CriaControlador(this);
+        cargarVista("registro", controlador);
+        
+        browser.addConsoleListener(new ConsoleListener() {
+        	public void onMessage(ConsoleEvent event) {
+                System.out.println(event.getLevel()+": "+event.getMessage());
+            }
+        });
+
         vista.add(browserView, BorderLayout.CENTER);
         pack();
 	}

@@ -13,6 +13,10 @@ public class CriaControlador extends AplControlador {
 		super(aplicacion);
 	}
 
+	public int registrarCria(double peso, double grasa, int color) {
+		return modelo.registrarCria(peso, grasa, color);
+	}
+	
 	public String toString() {
 		return "Crias";
 	}
