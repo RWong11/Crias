@@ -8,7 +8,6 @@ public class BDConexion {
 	static private Connection conn;
 
 	private BDConexion() {
-
 	}
 
 	static synchronized public Connection getConexion(String db) {
