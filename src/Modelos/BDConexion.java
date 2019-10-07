@@ -1,5 +1,37 @@
 package Modelos;
 
-public class BDConexion {
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
+public class BDConexion {
+	static private Connection conn;
+
+	private BDConexion() {
+
+	}
+
+	static synchronized public Connection getConexion(String db) {
+		if(conn == null) {
+			String url= "jdbc:sqlserver://10.10.99.113\\sqlutilerias;databaseName="+db+";user=rwong;password=456852;";
+			try {
+				conn = DriverManager.getConnection(url);
+			} 
+			catch (SQLException e) {
+				return null;
+			}
+		}
+		
+		return conn;
+	}
+
+	static synchronized public void cierraConexion() {
+		try {
+			conn.close();
+			conn = null;
+		} 
+		catch(SQLException E) {
+			
+		}
+	}
 }
