@@ -13,7 +13,7 @@ public class BDConexion {
 
 	static synchronized public Connection getConexion(String db) {
 		if(conn == null) {
-			String url = "jdbc:sqlserver://localhost\\SQLEXPRESS:1433;databaseName="+db+";user=tuusuario;password=tupassword;";
+			String url= "jdbc:sqlserver://10.10.99.113\\sqlutilerias;databaseName="+db+";user=rwong;password=456852;";
 			try {
 				conn = DriverManager.getConnection(url);
 			} 
