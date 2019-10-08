@@ -42,22 +42,20 @@
   </body>
 <script>
 $(document).ready(function() {
+	cargarColores();
+	
 	 $("#formCrias").submit(function(event) {
 		 event.preventDefault();
 		 registrarCria();
 	});
-	 
-	cargarColores();
 });
 
 function registrarCria() {
 	var peso = parseFloat($("#inputPeso").val());
 	var grasa = parseFloat($("#inputGrasa").val());
 	var color = parseInt($("#inputColor").val());
-		
-	console.log(peso + " " +grasa + " " +color)
+
 	var resultado = window.java.registrarCria(peso, grasa, color);
-	console.log("Resultado: " +resultado);
 	if(resultado == 1) {
 		Swal.fire({
 		  type: 'success',	
@@ -68,6 +66,8 @@ function registrarCria() {
 		    popup: 'animated bounceInDown'
 		  }
 		});
+		
+		$("#formCrias")[0].reset();
 	}
 	else {
 		Swal.fire({
@@ -83,9 +83,9 @@ function registrarCria() {
 }
 
 function cargarColores() {
-	var colores = JSON.parse(window.java.cargarLista(1));
-	colores.forEach(function(color, index) {
-		$("#inputColor").append(new Option(color.text, color.value));
+	var elementos = JSON.parse(window.java.cargarLista(1));
+	elementos.forEach(function(elemento, index) {
+		$("#inputColor").append(new Option(elemento.text, elemento.value));
 	});
 }
 
