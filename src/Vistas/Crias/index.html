@@ -5,7 +5,8 @@
     <link rel="stylesheet" href="../Contenido/css/font-awesome.min.css">
     <link rel="stylesheet" href="../Contenido/css/vista.css">
     <link rel="stylesheet" href="../Contenido/css/sweetalert2.min.css">
-    <script src="../Contenido/js/jquery-3.4.1.slim.min.js"></script>
+    <script src="../Contenido/js/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
     <script src="../Contenido/js/popper.min.js"></script>
     <script src="../Contenido/js/bootstrap.min.js"></script>
     <script src="../Contenido/js/sweetalert2.min.js"></script>
@@ -13,20 +14,45 @@
   <body>
   <div class = "main"><div class = "wrapper">
     <h1 class="display-4" align="center">Crias</h1>
-    <button id="button2" class="btn bt-primary">prueba</button>
+    <table id="example" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>Position</th>
+                <th>Office</th>
+                <th>Start date</th>
+                <th>Salary</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>Position</th>
+                <th>Office</th>
+                <th>Start date</th>
+                <th>Salary</th>
+            </tr>
+        </tfoot>
+    </table>
    </div></div>
   </body>
 <script>
 $( document ).ready(function() {
-	$("#button2").click(function() {
-		Swal.fire({
-			  title: 'Custom animation with Animate.css',
-			  animation: false,
-			  customClass: {
-			    popup: 'animated tada'
-			  }
-			})
-	})
+	$('#example').DataTable( {
+        "processing": true,
+        "serverSide": true,
+        "ajax": "json.json",
+        "columns": [
+            { "data": "first_name" },
+            { "data": "last_name" },
+            { "data": "position" },
+            { "data": "office" },
+            { "data": "start_date" },
+            { "data": "salary" }
+        ]
+    } );
 });
 </script>
 </html>

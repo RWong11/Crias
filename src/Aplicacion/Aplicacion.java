@@ -3,14 +3,24 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.File;
+import java.nio.charset.Charset;
 
 import javax.swing.*;
 
 import com.kingaspx.util.BrowserUtil;
 import com.kingaspx.version.Version;
 import com.teamdev.jxbrowser.chromium.Browser;
+import com.teamdev.jxbrowser.chromium.BrowserContext;
+import com.teamdev.jxbrowser.chromium.BrowserPreferences;
+import com.teamdev.jxbrowser.chromium.DataReceivedParams;
+import com.teamdev.jxbrowser.chromium.NetworkService;
+import com.teamdev.jxbrowser.chromium.ProtocolHandler;
+import com.teamdev.jxbrowser.chromium.ProtocolService;
+import com.teamdev.jxbrowser.chromium.URLRequest;
+import com.teamdev.jxbrowser.chromium.URLResponse;
 import com.teamdev.jxbrowser.chromium.events.ConsoleEvent;
 import com.teamdev.jxbrowser.chromium.events.ConsoleListener;
+import com.teamdev.jxbrowser.chromium.javafx.DefaultNetworkDelegate;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 
 import Controladores.*;
@@ -73,6 +83,7 @@ public class Aplicacion extends JFrame {
 	
 	public void inicializarComponentes() {
 		BrowserUtil.setVersion(Version.V6_22);
+		BrowserPreferences.setChromiumSwitches("--disable-web-security", "--allow-file-access-from-files");
 		browser = new Browser();
         browserView = new BrowserView(browser);
 		
