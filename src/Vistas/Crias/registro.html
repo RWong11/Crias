@@ -56,7 +56,7 @@ function registrarCria() {
 	var color = parseInt($("#inputColor").val());
 
 	var resultado = window.java.registrarCria(peso, grasa, color);
-	if(resultado == 1) {
+	if(resultado > 0) {
 		Swal.fire({
 		  type: 'success',	
 		  title: 'Cria registrada correctamente!',
@@ -64,7 +64,11 @@ function registrarCria() {
 		  timer: 4000,
 		  customClass: {
 		    popup: 'animated bounceInDown'
-		  }
+		  },
+		  onClose: () => {
+			  if(resultado == 2)
+              	alertaSensor();
+          	}
 		});
 		
 		$("#formCrias")[0].reset();
@@ -80,6 +84,18 @@ function registrarCria() {
 		  }
 		});
 	}
+}
+
+function alertaSensor() {
+	Swal.fire({
+		  type: 'info',	
+		  title: 'Aviso',
+		  text: 'Esta cria ha sido clasificada como grasa cobertura 2, recuerde ponerle su sensor!',
+		  animation: false,
+		  customClass: {
+		    popup: 'animated wobble'
+		  }
+		});
 }
 
 function cargarColores() {

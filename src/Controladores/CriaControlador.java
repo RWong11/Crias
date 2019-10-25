@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 
 import Aplicacion.Aplicacion;
 import Modelos.CriaModelo;
-import Modelos.GlobalModelo;
 
 public class CriaControlador extends AplControlador {
 	private CriaModelo modelo = new CriaModelo();
@@ -15,6 +14,13 @@ public class CriaControlador extends AplControlador {
 
 	public int registrarCria(double peso, double grasa, int color) {
 		return modelo.registrarCria(peso, grasa, color);
+	}
+	
+	public String cargarCrias() {
+		System.out.println("Entra controlador");
+		String json = new Gson().toJson(modelo.cargarCrias());
+		System.out.println("JSON: " +json);
+		return json;
 	}
 	
 	public String toString() {

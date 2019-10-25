@@ -102,7 +102,7 @@ public class Aplicacion extends JFrame {
 
         cargarMenu();
         controlador = new CriaControlador(this);
-        cargarVista("registro", controlador);
+        cargarVista("index", controlador);
         
         browser.addConsoleListener(new ConsoleListener() {
         	public void onMessage(ConsoleEvent event) {
