@@ -40,6 +40,7 @@
         <thead>
             <tr>
             	<th>+</th>
+            	<th>No. Cria</th>
                 <th>Clasificación</th>
                 <th>Estado</th>
                 <th>Corral</th>
@@ -50,6 +51,7 @@
         <tfoot>
             <tr>
                 <th>+</th>
+                <th>No. Cria</th>
                 <th>Clasificación</th>
                 <th>Estado</th>
                 <th>Corral</th>
@@ -146,6 +148,7 @@ $( document ).ready(function() {
                 "data": null,
                 "defaultContent": ''
             },
+            { "data": "cri_id" },
             { "data": "cla_descripcion" },
             { "data": "est_descripcion" },
             { "data": "cor_descripcion" },
@@ -178,11 +181,18 @@ $( document ).ready(function() {
 });
 
 function formatInfo(d) {
-    var formato = '<ul class="list-group list-group-horizontal-sm">' +
+	var formato = '<div class="row">';
+	if(d.est_id == 2) 
+		formato += '<div class="col-3"><button class="btn btn-success">Mandar a cuarentena</button></div>';
+	else if(d.est_id == 3)
+		formato += '<div class="col-3"><button class="btn btn-success">Sacar de cuarentena</button></div>';
+	
+	formato += '<br></div>';
+    formato += '<ul class="list-group list-group-horizontal-sm">' +
                   '<li class="list-group-item"><b>Peso:</b> ' + d.cri_peso +'</li>' +
                   '<li class="list-group-item"><b>Cantidad de Grasa:</b> ' + d.cri_grasa + '</li>' +
-                  '<li class="list-group-item"><b>Color del Musculo:</b> ' + d.col_descripcion + '</li></ul>';
-
+                  '<li class="list-group-item"><b>Color del Musculo:</b> ' + d.col_descripcion + '</li>' +
+                  '<li class="list-group-item"><b>Dieta:</b> ' + d.cri_dieta + '</li></ul>';
     return formato;
 }
 </script>

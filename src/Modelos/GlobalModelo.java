@@ -21,7 +21,6 @@ public class GlobalModelo {
 		try(Connection con = BDConexion.getConexion("pruebas")) {
 			PreparedStatement ps = con.prepareStatement("EXEC Pa_CargarLista ?");
 			ps.setInt(1, n);
-			
 			ResultSet rs = ps.executeQuery();
 			while(rs.next())
 				lista.add(new SelectItem(rs.getInt(1), rs.getString(2)));
@@ -30,8 +29,24 @@ public class GlobalModelo {
 			System.out.println(e.toString());
 		}
 		finally { BDConexion.cierraConexion(); }
-				
+		
 		return lista;
+	}
+	
+	public int prueba(int id, String msg) {
+		int resultado = 0;
+		try(Connection con = BDConexion.getConexion("pruebas")) {
+			PreparedStatement ps = con.prepareStatement("EXEC Pa_Prueba ?, ?");
+			ps.setInt(1, id);
+			ps.setString(2, msg);
+			
+			resultado = ps.executeUpdate();
+		}
+		catch(SQLException e) { 
+			System.out.println(e.toString());
+		}
+		finally { BDConexion.cierraConexion(); }
+		return resultado;
 	}
 }
 

@@ -41,7 +41,7 @@ public class CriaModelo {
 			ResultSet rs = ps.executeQuery();
 			while(rs.next())
 				lista.add(new Cria(rs.getInt("cri_id"), rs.getInt("cla_id"), rs.getString("cla_descripcion"), rs.getDouble("cri_peso"), rs.getDouble("cri_grasa"), rs.getInt("col_id"), rs.getString("col_descripcion"), 
-						rs.getInt("est_id"), rs.getString("est_descripcion"), rs.getInt("cor_id"), rs.getString("cor_descripcion"), rs.getInt("cri_alimentacion"), rs.getInt("proceso_actual")));
+						rs.getInt("est_id"), rs.getString("est_descripcion"), rs.getInt("cor_id"), rs.getString("cor_descripcion"), rs.getString("dieta"), rs.getInt("proceso_actual")));
 		}
 		catch(SQLException e) { 
 			System.out.println(e.toString());
@@ -64,10 +64,10 @@ class Cria {
 	private String est_descripcion;
 	private int cor_id;
 	private String cor_descripcion;
-	private int cri_alimentacion;
+	private String cri_dieta;
 	private int proceso_actual;
 	
-	public Cria(int cri_id, int cla_id, String cla_descripcion, double cri_peso, double cri_grasa, int col_id, String col_descripcion, int est_id, String est_descripcion, int cor_id, String cor_descripcion, int cri_alimentacion, int proceso_actual) {
+	public Cria(int cri_id, int cla_id, String cla_descripcion, double cri_peso, double cri_grasa, int col_id, String col_descripcion, int est_id, String est_descripcion, int cor_id, String cor_descripcion, String cri_dieta, int proceso_actual) {
 		this.cri_id = cri_id;
 		this.cla_id = cla_id;
 		this.cla_descripcion = cla_descripcion;
@@ -79,7 +79,7 @@ class Cria {
 		this.est_descripcion = est_descripcion;
 		this.cor_id = cor_id;
 		this.cor_descripcion = cor_descripcion;
-		this.cri_alimentacion = cri_alimentacion;
+		this.cri_dieta = cri_dieta;
 		this.proceso_actual = proceso_actual;
 	}
 }

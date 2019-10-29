@@ -23,9 +23,6 @@ public class AplControlador extends ScriptContextAdapter {
         JSValue window = browser.executeJavaScriptAndReturnValue("window");
         window.asObject().setProperty("java", this);
     }
-	public String toString() {
-		return "../..";
-	}
 	// ----------------------------------------
 	
 	public void cargarVista(String vista, String controlador) {

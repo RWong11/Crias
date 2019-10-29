@@ -34,6 +34,3 @@ BEGIN
 END
 GO
 
-select * from Procesos_Cria
-
-
