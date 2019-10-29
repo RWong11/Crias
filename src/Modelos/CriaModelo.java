@@ -35,7 +35,6 @@ public class CriaModelo {
 	}
 	
 	public List<Cria> cargarCrias() {
-		System.out.println("Entra modelo");
 		List<Cria> lista = new ArrayList<Cria>();
 		try(Connection con = BDConexion.getConexion("pruebas")) {
 			PreparedStatement ps = con.prepareStatement("EXEC Pa_CargarCrias");

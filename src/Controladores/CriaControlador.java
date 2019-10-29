@@ -17,9 +17,8 @@ public class CriaControlador extends AplControlador {
 	}
 	
 	public String cargarCrias() {
-		System.out.println("Entra controlador");
 		String json = new Gson().toJson(modelo.cargarCrias());
-		System.out.println("JSON: " +json);
+		//System.out.println("JSON: " +json);
 		return json;
 	}
 	

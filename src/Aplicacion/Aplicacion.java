@@ -39,7 +39,7 @@ public class Aplicacion extends JFrame {
 	
 	public void abrirFrame() {
 		setTitle("Corrales Ternero");
-		setSize(1000, 700);
+		setSize(1400, 800);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
@@ -101,8 +101,7 @@ public class Aplicacion extends JFrame {
         add(vista, c);
 
         cargarMenu();
-        controlador = new CriaControlador(this);
-        cargarVista("index", controlador);
+        browser.loadURL(new File("src/Vistas/inicio.html").getAbsolutePath());
         
         browser.addConsoleListener(new ConsoleListener() {
         	public void onMessage(ConsoleEvent event) {
