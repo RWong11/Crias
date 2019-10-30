@@ -76,7 +76,7 @@ SET ANSI_PADDING OFF
 GO
 
 
-INSERT INTO Cat_Estados VALUES ('Sana'), ('Apunto de enfermar'), ('Enferma'), ('Sacrificada'), ('Baja')
+INSERT INTO Cat_Estados VALUES ('Sana'), ('Apunto de enfermar'), ('En Cuarentena'), ('Sacrificada'), ('Baja')
 
 CREATE TABLE [dbo].[Crias](
 	[cri_id] [int] IDENTITY(1,1) NOT NULL,
@@ -163,3 +163,207 @@ GO
 
 ALTER TABLE [dbo].[Procesos_Cria] CHECK CONSTRAINT [FK__Procesos___pro_c__114A936A]
 GO
+
+USE [pruebas]
+GO
+
+/****** Object:  View [dbo].[Vi_Crias]    Script Date: 28/10/2019 18:15:21 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+create view [dbo].[Vi_Crias] AS
+SELECT cri_id, cla_id, cla_descripcion, cri_peso, cri_grasa, col_id, col_descripcion, est_id, est_descripcion, cor_id, cor_descripcion,
+COALESCE((SELECT enf_alimentacion FROM Enfermedades_Cria WHERE cri_id = enf_cria AND enf_fechaRecupero is null), 'Sin dieta') dieta,
+(SELECT MAX(pro_numero) FROM Procesos_Cria WHERE pro_cria = cri_id) proceso_actual
+FROM crias
+INNER JOIN Cat_Clasificaciones ON cri_clasificacion = cla_id
+INNER JOIN Cat_Colores ON cri_color = col_id
+INNER JOIN Cat_Corrales ON cri_corral = cor_id
+INNER JOIN Cat_Estados ON cri_estado = est_id
+GO
+
+USE [pruebas]
+GO
+IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_CargarCrias' AND xtype = 'P')
+	BEGIN 
+		DROP PROCEDURE dbo.Pa_CargarCrias
+	END
+GO
+create procedure Pa_CargarCrias
+AS
+BEGIN
+	SELECT * FROM Vi_Crias
+END
+
+USE [pruebas]
+GO
+IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_CargarLista' AND xtype = 'P')
+	BEGIN 
+		DROP PROCEDURE dbo.Pa_CargarLista
+	END
+GO
+/****** Object:  StoredProcedure [dbo].[Pa_CargarLista]    Script Date: 25/10/2019 15:15:12 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+create procedure [dbo].[Pa_CargarLista] @num int
+AS
+BEGIN
+	if(@num = 1)
+		SELECT col_id, col_descripcion FROM Cat_Colores
+END
+GO
+
+USE [pruebas]
+GO
+IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_PruebaSensor' AND xtype = 'P')
+	BEGIN 
+		DROP PROCEDURE dbo.Pa_PruebaSensor
+	END
+GO
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+create procedure Pa_PruebaSensor
+AS
+BEGIN
+	DECLARE @id INT
+	DECLARE @num INT
+	DECLARE CriasFinas CURSOR FOR SELECT cri_id FROM Crias WHERE cri_clasificacion = 2 AND cri_estado = 1
+	OPEN CriasFinas
+	FETCH NEXT FROM CriasFinas INTO @id
+	WHILE @@fetch_status = 0
+	BEGIN
+		SET @num = FLOOR(RAND()*6)
+		IF @num = 3
+			UPDATE Crias SET cri_estado = 2 WHERE cri_id = @id
+
+		FETCH NEXT FROM CriasFinas INTO @id
+	END
+	CLOSE CriasFinas
+	DEALLOCATE CriasFinas
+END
+
+USE [pruebas]
+GO
+IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_RegistrarCria' AND xtype = 'P')
+	BEGIN 
+		DROP PROCEDURE dbo.Pa_RegistrarCria
+	END
+GO
+/****** Object:  StoredProcedure [dbo].[Pa_RegistrarCria]    Script Date: 25/10/2019 15:14:27 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE procedure [dbo].[Pa_RegistrarCria] @cri_peso float, @cri_grasa float, @cri_color int
+AS
+BEGIN
+	DECLARE @cri_clasificacion int
+	if(@cri_peso < 20)
+		SET @cri_clasificacion = 1
+	else if(@cri_peso < 50)
+		SET @cri_clasificacion = 2
+	else
+		SET @cri_clasificacion = 3
+
+	SELECT @cri_clasificacion as Clasificacion /* Seleccionamos la clasificacion para retornarla desde la aplicación */
+	INSERT INTO Crias (cri_clasificacion, cri_peso, cri_grasa, cri_color)
+	VALUES (@cri_clasificacion, @cri_peso, @cri_grasa, @cri_color)
+
+	/* La hacemos iniciar en el proceso 1 */
+	DECLARE @cri_id int = scope_identity()
+	INSERT INTO Procesos_Cria (pro_cria, pro_numero, pro_fechaInicio) 
+	VALUES (@cri_id, 1, GETDATE())
+END
+GO
+
+USE [pruebas]
+GO
+IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_RegistrarCuarentena' AND xtype = 'P')
+	BEGIN 
+		DROP PROCEDURE dbo.Pa_RegistrarCuarentena
+	END
+GO
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE procedure [dbo].[Pa_RegistrarCuarentena] @cri_id int, @dieta varchar(256)
+AS
+BEGIN
+	INSERT INTO Enfermedades_Cria (enf_cria, enf_fechaInicio, enf_alimentacion) 
+	VALUES (@cri_id, GETDATE(), @dieta)
+
+	UPDATE Crias SET cri_estado = 3, cri_corral = 2 WHERE cri_id = @cri_id
+END
+GO
+
+USE [pruebas]
+GO
+IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_SacarCuarentena' AND xtype = 'P')
+	BEGIN 
+		DROP PROCEDURE dbo.Pa_SacarCuarentena
+	END
+GO
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE procedure [dbo].[Pa_SacarCuarentena] @cri_id int
+AS
+BEGIN
+	UPDATE Enfermedades_Cria SET enf_fechaRecupero = GETDATE() WHERE enf_cria = @cri_id AND enf_fechaRecupero is null
+
+	IF @@ROWCOUNT > 0
+		UPDATE Crias SET cri_estado = 1, cri_corral = 1 WHERE cri_id = @cri_id
+END
+GO
+
+USE [pruebas]
+GO
+IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_SacrificarCria' AND xtype = 'P')
+	BEGIN 
+		DROP PROCEDURE dbo.Pa_SacrificarCria
+	END
+GO
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE procedure [dbo].[Pa_SacrificarCria] @cri_id int
+AS
+BEGIN
+	UPDATE Crias SET cri_estado = 4 WHERE cri_id = @cri_id
+END
+GO
+
+CREATE TRIGGER Tri_CriasEstados ON Crias AFTER UPDATE
+AS
+BEGIN
+	DECLARE @viejo INT
+	DECLARE @nuevo INT
+	SELECT @viejo = cri_estado FROM deleted
+	SELECT @nuevo = cri_estado FROM inserted
+
+	if @nuevo<>@viejo
+		INSERT INTO Log_CriasEstados
+		SELECT cri_id, GETDATE(), @nuevo from inserted
+END
