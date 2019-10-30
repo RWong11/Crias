@@ -105,7 +105,7 @@ public class Aplicacion extends JFrame {
         
         browser.addConsoleListener(new ConsoleListener() {
         	public void onMessage(ConsoleEvent event) {
-                System.out.println(event.getLevel()+": "+event.getMessage());
+                System.out.println(event.getLevel()+": "+event.getMessage() + " (" +event.getLineNumber() + ")");
             }
         });
 

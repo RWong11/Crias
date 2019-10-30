@@ -50,6 +50,68 @@ public class CriaModelo {
 				
 		return lista;
 	}
+	
+	public int registrarCuarentena(int id, String dieta) {
+		int resultado = 0;
+		try(Connection con = BDConexion.getConexion("pruebas")) {
+			PreparedStatement ps = con.prepareStatement("EXEC Pa_RegistrarCuarentena ?, ?");
+			ps.setInt(1, id);
+			ps.setString(2, dieta);
+			
+			resultado = ps.executeUpdate();
+		}
+		catch(SQLException e) { 
+			System.out.println(e.toString());
+		}
+		finally { BDConexion.cierraConexion(); }
+		return resultado;
+	}
+	
+	public int sacarCuarentena(int id) {
+		int resultado = 0;
+		try(Connection con = BDConexion.getConexion("pruebas")) {
+			PreparedStatement ps = con.prepareStatement("EXEC Pa_SacarCuarentena ?");
+			ps.setInt(1, id);
+			resultado = ps.executeUpdate();
+		}
+		catch(SQLException e) { 
+			System.out.println(e.toString());
+		}
+		finally { BDConexion.cierraConexion(); }
+		return resultado;
+	}
+	
+	public int sacrificar(int id) {
+		int resultado = 0;
+		try(Connection con = BDConexion.getConexion("pruebas")) {
+			PreparedStatement ps = con.prepareStatement("EXEC Pa_SacrificarCria ?");
+			ps.setInt(1, id);
+			resultado = ps.executeUpdate();
+		}
+		catch(SQLException e) { 
+			System.out.println(e.toString());
+		}
+		finally { BDConexion.cierraConexion(); }
+		return resultado;
+	}
+	
+	public List<Movimiento> cargarMovimientos(int id) {
+		List<Movimiento> lista = new ArrayList<Movimiento>();
+		try(Connection con = BDConexion.getConexion("pruebas")) {
+			PreparedStatement ps = con.prepareStatement("EXEC Pa_LogCria ?");
+			ps.setInt(1, id);
+			
+			ResultSet rs = ps.executeQuery();
+			while(rs.next())
+				lista.add(new Movimiento(rs.getString(1), rs.getString(2)));
+		}
+		catch(SQLException e) { 
+			System.out.println(e.toString());
+		}
+		finally { BDConexion.cierraConexion(); }
+				
+		return lista;
+	}
 }
 
 class Cria {
@@ -81,5 +143,15 @@ class Cria {
 		this.cor_descripcion = cor_descripcion;
 		this.cri_dieta = cri_dieta;
 		this.proceso_actual = proceso_actual;
+	}
+}
+
+class Movimiento {
+	private String movimiento;
+	private String fecha;
+	
+	public Movimiento(String movimiento, String fecha) {
+		this.movimiento = movimiento;
+		this.fecha = fecha;
 	}
 }

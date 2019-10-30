@@ -32,22 +32,6 @@ public class GlobalModelo {
 		
 		return lista;
 	}
-	
-	public int prueba(int id, String msg) {
-		int resultado = 0;
-		try(Connection con = BDConexion.getConexion("pruebas")) {
-			PreparedStatement ps = con.prepareStatement("EXEC Pa_Prueba ?, ?");
-			ps.setInt(1, id);
-			ps.setString(2, msg);
-			
-			resultado = ps.executeUpdate();
-		}
-		catch(SQLException e) { 
-			System.out.println(e.toString());
-		}
-		finally { BDConexion.cierraConexion(); }
-		return resultado;
-	}
 }
 
 class SelectItem {

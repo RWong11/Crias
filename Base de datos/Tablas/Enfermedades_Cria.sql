@@ -12,7 +12,7 @@ CREATE TABLE [dbo].[Enfermedades_Cria](
 	[enf_cria] [int] NOT NULL,
 	[enf_fechaInicio] [datetime] NOT NULL,
 	[enf_fechaRecupero] [datetime] NULL,
-	[enf_alimentacion] [int] NULL,
+	[enf_alimentacion] varchar(256) NOT NULL,
 PRIMARY KEY CLUSTERED 
 (
 	[enf_cria] ASC,
@@ -20,10 +20,6 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 
-GO
-
-ALTER TABLE [dbo].[Enfermedades_Cria]  WITH CHECK ADD FOREIGN KEY([enf_alimentacion])
-REFERENCES [dbo].[Alimentos] ([ali_id])
 GO
 
 ALTER TABLE [dbo].[Enfermedades_Cria]  WITH CHECK ADD  CONSTRAINT [FK__Enfermeda__enf_c__14270015] FOREIGN KEY([enf_cria])

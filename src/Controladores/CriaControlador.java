@@ -22,6 +22,24 @@ public class CriaControlador extends AplControlador {
 		return json;
 	}
 	
+	public int registrarCuarentena(int id, String dieta) {
+		return modelo.registrarCuarentena(id, dieta);
+	}
+	
+	public int sacarCuarentena(int id) {
+		return modelo.sacarCuarentena(id);
+	}
+	
+	public int sacrificar(int id) {
+		return modelo.sacrificar(id);
+	}
+	
+	public String cargarMovimientos(int id) {
+		String json = new Gson().toJson(modelo.cargarMovimientos(id));
+		//System.out.println("JSON: " +json);
+		return json;
+	}
+	
 	public String toString() {
 		return "Crias";
 	}
