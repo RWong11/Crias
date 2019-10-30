@@ -164,8 +164,33 @@ GO
 ALTER TABLE [dbo].[Procesos_Cria] CHECK CONSTRAINT [FK__Procesos___pro_c__114A936A]
 GO
 
-USE [pruebas]
+SET ANSI_NULLS ON
 GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Log_CriasEstados](
+	[cri_id] [int] NOT NULL,
+	[fecha] [datetime] NOT NULL,
+	[cri_estado] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[cri_id] ASC,
+	[fecha] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+
+ALTER TABLE [dbo].[Log_CriasEstados]  WITH CHECK ADD FOREIGN KEY([cri_estado])
+REFERENCES [dbo].[Cat_Estados] ([est_id])
+GO
+
+ALTER TABLE [dbo].[Log_CriasEstados]  WITH CHECK ADD FOREIGN KEY([cri_id])
+REFERENCES [dbo].[Crias] ([cri_id])
+GO
+
 
 /****** Object:  View [dbo].[Vi_Crias]    Script Date: 28/10/2019 18:15:21 ******/
 SET ANSI_NULLS ON
@@ -185,8 +210,6 @@ INNER JOIN Cat_Corrales ON cri_corral = cor_id
 INNER JOIN Cat_Estados ON cri_estado = est_id
 GO
 
-USE [pruebas]
-GO
 IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_CargarCrias' AND xtype = 'P')
 	BEGIN 
 		DROP PROCEDURE dbo.Pa_CargarCrias
@@ -198,8 +221,6 @@ BEGIN
 	SELECT * FROM Vi_Crias
 END
 
-USE [pruebas]
-GO
 IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_CargarLista' AND xtype = 'P')
 	BEGIN 
 		DROP PROCEDURE dbo.Pa_CargarLista
@@ -220,8 +241,6 @@ BEGIN
 END
 GO
 
-USE [pruebas]
-GO
 IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_PruebaSensor' AND xtype = 'P')
 	BEGIN 
 		DROP PROCEDURE dbo.Pa_PruebaSensor
@@ -253,8 +272,6 @@ BEGIN
 	DEALLOCATE CriasFinas
 END
 
-USE [pruebas]
-GO
 IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_RegistrarCria' AND xtype = 'P')
 	BEGIN 
 		DROP PROCEDURE dbo.Pa_RegistrarCria
@@ -289,8 +306,6 @@ BEGIN
 END
 GO
 
-USE [pruebas]
-GO
 IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_RegistrarCuarentena' AND xtype = 'P')
 	BEGIN 
 		DROP PROCEDURE dbo.Pa_RegistrarCuarentena
@@ -312,8 +327,6 @@ BEGIN
 END
 GO
 
-USE [pruebas]
-GO
 IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_SacarCuarentena' AND xtype = 'P')
 	BEGIN 
 		DROP PROCEDURE dbo.Pa_SacarCuarentena
@@ -335,8 +348,6 @@ BEGIN
 END
 GO
 
-USE [pruebas]
-GO
 IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_SacrificarCria' AND xtype = 'P')
 	BEGIN 
 		DROP PROCEDURE dbo.Pa_SacrificarCria
@@ -366,4 +377,22 @@ BEGIN
 	if @nuevo<>@viejo
 		INSERT INTO Log_CriasEstados
 		SELECT cri_id, GETDATE(), @nuevo from inserted
+END
+
+IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_LogCria' AND xtype = 'P')
+	BEGIN 
+		DROP PROCEDURE dbo.Pa_LogCria
+	END
+GO
+create procedure Pa_LogCria @cri_id int
+AS
+BEGIN
+	WITH CTE(Movimiento, fecha) 
+	AS(
+		SELECT ('Cambio de Estado: ' +est_descripcion), fecha FROM Log_CriasEstados INNER JOIN Cat_Estados ON cri_estado = est_id
+		WHERE cri_id = @cri_id
+		UNION ALL
+		SELECT ('Entra al Proceso: ' +CAST(pro_numero as varchar(2))), pro_fechaInicio FROM Procesos_Cria WHERE pro_cria = @cri_id
+	)
+	SELECT * FROM CTE ORDER BY fecha
 END
