@@ -39,7 +39,7 @@ public class Aplicacion extends JFrame {
 	
 	public void abrirFrame() {
 		setTitle("Corrales Ternero");
-		setSize(1000, 600);
+		setSize(1200, 600);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
