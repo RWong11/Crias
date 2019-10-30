@@ -1,6 +1,3 @@
-create database pruebas
-use pruebas
-
 SET ANSI_NULLS ON
 GO
 
@@ -220,7 +217,7 @@ AS
 BEGIN
 	SELECT * FROM Vi_Crias
 END
-
+GO
 IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_CargarLista' AND xtype = 'P')
 	BEGIN 
 		DROP PROCEDURE dbo.Pa_CargarLista
@@ -271,7 +268,7 @@ BEGIN
 	CLOSE CriasFinas
 	DEALLOCATE CriasFinas
 END
-
+GO
 IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_RegistrarCria' AND xtype = 'P')
 	BEGIN 
 		DROP PROCEDURE dbo.Pa_RegistrarCria
@@ -365,20 +362,6 @@ BEGIN
 	UPDATE Crias SET cri_estado = 4 WHERE cri_id = @cri_id
 END
 GO
-
-CREATE TRIGGER Tri_CriasEstados ON Crias AFTER UPDATE
-AS
-BEGIN
-	DECLARE @viejo INT
-	DECLARE @nuevo INT
-	SELECT @viejo = cri_estado FROM deleted
-	SELECT @nuevo = cri_estado FROM inserted
-
-	if @nuevo<>@viejo
-		INSERT INTO Log_CriasEstados
-		SELECT cri_id, GETDATE(), @nuevo from inserted
-END
-
 IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_LogCria' AND xtype = 'P')
 	BEGIN 
 		DROP PROCEDURE dbo.Pa_LogCria
@@ -396,3 +379,17 @@ BEGIN
 	)
 	SELECT * FROM CTE ORDER BY fecha
 END
+GO
+CREATE TRIGGER Tri_CriasEstados ON Crias AFTER UPDATE
+AS
+BEGIN
+	DECLARE @viejo INT
+	DECLARE @nuevo INT
+	SELECT @viejo = cri_estado FROM deleted
+	SELECT @nuevo = cri_estado FROM inserted
+
+	if @nuevo<>@viejo
+		INSERT INTO Log_CriasEstados
+		SELECT cri_id, GETDATE(), @nuevo from inserted
+END
+GO
