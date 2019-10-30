@@ -34,10 +34,11 @@ public class CriaModelo {
 		return resultado;
 	}
 	
-	public List<Cria> cargarCrias() {
+	public List<Cria> cargarCrias(int num) {
 		List<Cria> lista = new ArrayList<Cria>();
 		try(Connection con = BDConexion.getConexion("pruebas")) {
-			PreparedStatement ps = con.prepareStatement("EXEC Pa_CargarCrias");
+			PreparedStatement ps = con.prepareStatement("EXEC Pa_CargarCrias ?");
+			ps.setInt(1, num);
 			ResultSet rs = ps.executeQuery();
 			while(rs.next())
 				lista.add(new Cria(rs.getInt("cri_id"), rs.getInt("cla_id"), rs.getString("cla_descripcion"), rs.getDouble("cri_peso"), rs.getDouble("cri_grasa"), rs.getInt("col_id"), rs.getString("col_descripcion"), 

@@ -16,8 +16,8 @@ public class CriaControlador extends AplControlador {
 		return modelo.registrarCria(peso, grasa, color);
 	}
 	
-	public String cargarCrias() {
-		String json = new Gson().toJson(modelo.cargarCrias());
+	public String cargarCrias(int num) {
+		String json = new Gson().toJson(modelo.cargarCrias(num));
 		//System.out.println("JSON: " +json);
 		return json;
 	}

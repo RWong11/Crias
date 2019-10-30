@@ -51,6 +51,7 @@
                 <th>Opciones</th>
             </tr>
         </thead>
+        <tbody></tbody>
         <tfoot>
             <tr>
                 <th>+</th>
@@ -68,7 +69,104 @@
 <script>
 var table;
 $( document ).ready(function() {
-	var data = JSON.parse(window.java.cargarCrias());
+	
+	menuFiltro();
+	$('#tablaCrias tbody').on('click', 'td.details-control', function () {
+        var tr = $(this).closest('tr');
+        var row = table.row(tr);
+
+        if (row.child.isShown()) {
+            row.child.hide();
+            tr.removeClass('shown');
+        }
+        else {
+            row.child(formatInfo(row.data(), row.index())).show();
+            tr.addClass('shown');
+        }
+    });
+	
+	$(document).on("click", "button.btn-success", function () {
+		var rowIndex = $(this).data('row');
+        var rowData = table.row(rowIndex).data();
+        if(rowData.est_id == 3) {
+        	 Swal.fire({
+                 title: 'Sacar de Cuarentena',
+                 text: "¿Estas seguro de mandar esta Cria como sana al corral general?",
+                 type: 'question',
+                 showCancelButton: true,
+                 confirmButtonColor: '#3085d6',
+                 cancelButtonColor: '#d33',
+                 confirmButtonText: 'Confirmar',
+                 cancelButtonText: 'Cancelar'
+             }).then((result) => {
+                 if (result.value) {
+                	 sacarCuarentena(rowData, rowIndex);
+                 }
+             })
+        	return;
+        }
+        (async() => {
+            const { value: text } = await Swal.fire({
+                title: 'Mandar cria a cuarentena',
+                input: 'textarea',
+                inputPlaceholder: 'Escriba el tratamiento y dieta que llevara la cria...',
+                showCancelButton: true
+            })
+
+            if (text) {
+                registrarCuarentena(rowData, rowIndex, text);
+            }
+        })()
+    });
+	
+	$(document).on("click", "button.btn-danger", function () {
+		var rowIndex = $(this).data('row');
+        var rowData = table.row(rowIndex).data();
+        
+        Swal.fire({
+            title: 'Sacrificar',
+            text: "¿Estas seguro de sacrificar esta Cria?",
+            type: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Confirmar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.value) {
+           	 sacrificar(rowData, rowIndex, false);
+            }
+        })
+	});
+	
+	$(document).on("click", "button.btn-info", function () {
+		var rowIndex = $(this).data('row');
+        var rowData = table.row(rowIndex).data();
+        verLog(rowData.cri_id);
+	});
+});
+
+function menuFiltro() {
+	(async () => {
+		const { value: valor } = await Swal.fire({
+		  title: 'Consulta Crias',
+		  input: 'select',
+		  inputOptions: {
+		    1: 'Todas',
+		    2: 'Permanecieron mas de 5 meses'
+		  },
+		  inputPlaceholder: 'Seleccione una opcion',
+		})
+
+		if (valor) 
+			cargarTabla(valor);
+		else 
+			menuFiltro();
+	})()
+}
+
+function cargarTabla(valor) {
+	var data = JSON.parse(window.java.cargarCrias(2));
 	table = $('#tablaCrias').DataTable( {
 		"dom": 'Bfrtip',
 		lengthChange: false,
@@ -168,81 +266,7 @@ $( document ).ready(function() {
         ],
         "order": [[1, 'desc']]
     } );
-	
-	$('#tablaCrias tbody').on('click', 'td.details-control', function () {
-        var tr = $(this).closest('tr');
-        var row = table.row(tr);
-
-        if (row.child.isShown()) {
-            row.child.hide();
-            tr.removeClass('shown');
-        }
-        else {
-            row.child(formatInfo(row.data(), row.index())).show();
-            tr.addClass('shown');
-        }
-    });
-	
-	$(document).on("click", "button.btn-success", function () {
-		var rowIndex = $(this).data('row');
-        var rowData = table.row(rowIndex).data();
-        if(rowData.est_id == 3) {
-        	 Swal.fire({
-                 title: 'Sacar de Cuarentena',
-                 text: "¿Estas seguro de mandar esta Cria como sana al corral general?",
-                 type: 'question',
-                 showCancelButton: true,
-                 confirmButtonColor: '#3085d6',
-                 cancelButtonColor: '#d33',
-                 confirmButtonText: 'Confirmar',
-                 cancelButtonText: 'Cancelar'
-             }).then((result) => {
-                 if (result.value) {
-                	 sacarCuarentena(rowData, rowIndex);
-                 }
-             })
-        	return;
-        }
-        (async() => {
-            const { value: text } = await Swal.fire({
-                title: 'Mandar cria a cuarentena',
-                input: 'textarea',
-                inputPlaceholder: 'Escriba el tratamiento y dieta que llevara la cria...',
-                showCancelButton: true
-            })
-
-            if (text) {
-                registrarCuarentena(rowData, rowIndex, text);
-            }
-        })()
-    });
-	
-	$(document).on("click", "button.btn-danger", function () {
-		var rowIndex = $(this).data('row');
-        var rowData = table.row(rowIndex).data();
-        
-        Swal.fire({
-            title: 'Sacrificar',
-            text: "¿Estas seguro de sacrificar esta Cria?",
-            type: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Confirmar',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.value) {
-           	 sacrificar(rowData, rowIndex, false);
-            }
-        })
-	});
-	
-	$(document).on("click", "button.btn-info", function () {
-		var rowIndex = $(this).data('row');
-        var rowData = table.row(rowIndex).data();
-        verLog(rowData.cri_id);
-	});
-});
+}
 
 function sacarCuarentena(rowData, rowIndex) {
 	data = window.java.sacarCuarentena(rowData.cri_id);
@@ -374,6 +398,7 @@ function formatInfo(d, rowIndex) {
 	var formato = '<div class="row">';
 	
 	formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-info"><i class="fa fa-info-circle"></i> Movimientos (LOG)</button></div>';
+	formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-warning" disabled><i class="fa fa-arrow-circle-right"></i> Siguiente proceso</button></div>';
 	if(d.est_id == 2) 
 		formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-success"><i class="fa fa-thermometer-full"></i> Mandar a cuarentena</button></div>';
 	else if(d.est_id == 3)
