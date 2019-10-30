@@ -40,6 +40,10 @@ public class CriaControlador extends AplControlador {
 		return json;
 	}
 	
+	public int subirProceso(int id) {
+		return modelo.subirProceso(id);
+	}
+	
 	public String toString() {
 		return "Crias";
 	}

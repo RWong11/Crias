@@ -48,7 +48,6 @@
                 <th>Estado</th>
                 <th>Corral</th>
                 <th>Proceso actual</th>
-                <th>Opciones</th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -60,7 +59,6 @@
                 <th>Estado</th>
                 <th>Corral</th>
                 <th>Proceso actual</th>
-                <th>Opciones</th>
             </tr>
         </tfoot>
     </table>
@@ -144,6 +142,26 @@ $( document ).ready(function() {
         var rowData = table.row(rowIndex).data();
         verLog(rowData.cri_id);
 	});
+	
+	$(document).on("click", "button.btn-warning", function () {
+		var rowIndex = $(this).data('row');
+        var rowData = table.row(rowIndex).data();
+        
+        Swal.fire({
+            title: 'Confirmación',
+            text: "¿Esta seguro de mandar esta Cria al siguiente proceso?",
+            type: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Confirmar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.value) {
+            	subirProceso(rowData, rowIndex);
+            }
+        })
+	});
 });
 
 function menuFiltro() {
@@ -166,7 +184,7 @@ function menuFiltro() {
 }
 
 function cargarTabla(valor) {
-	var data = JSON.parse(window.java.cargarCrias(2));
+	var data = JSON.parse(window.java.cargarCrias(parseInt(valor)));
 	table = $('#tablaCrias').DataTable( {
 		"dom": 'Bfrtip',
 		lengthChange: false,
@@ -240,7 +258,6 @@ function cargarTabla(valor) {
                     '-1': "Visualizando todos"
                 }
             }
-            
         },
         "data": data,
         "columns": [
@@ -250,26 +267,49 @@ function cargarTabla(valor) {
                 "data": null,
                 "defaultContent": ''
             },
-            { "data": "cri_id" },
+            { "data": null, render: function(data, type, row) {
+           		return "#" + data.cri_id;
+        		} 
+        	},
             { "data": "cla_descripcion" },
             { "data": "est_descripcion" },
             { "data": "cor_descripcion" },
             { "data": null, render: function(data, type, row) {
-                return "P" + data.proceso_actual;
-            } },
-            {
-                data: null,
-                orderable: false,
-                className: "dt-center",
-                defaultContent: "<button class='btn btn-warning'><i class='fa fa-edit'></i></button>&nbsp;<button class='btn btn-danger'><i class='fa fa-close'></i></button>"
+               		return "P" + data.proceso_actual;
+            	} 
             }
         ],
         "order": [[1, 'desc']]
     } );
 }
 
+function subirProceso(rowData, rowIndex) {
+	var data = window.java.subirProceso(rowData.cri_id);
+	
+	if(data == 1) {
+		var proceso = "P" +(rowData.proceso_actual+1);
+        Swal.fire({
+            type: 'success',
+            title: 'Listo',
+            text: 'Cria No. ' +rowData.cri_id + ' Entro al proceso '+proceso,
+            timer: 3000
+        });
+        
+        rowData.proceso_actual = rowData.proceso_actual + 1;
+        actualizarFila(rowData, rowIndex);
+    }
+    else
+        Swal.fire({
+            title: 'Error',
+            text: "Esta cria no se puede mover al siguiente proceso",
+            type: "error",
+            animation: false,
+            customClass: { popup: 'animated tada' }
+        });
+}
+
 function sacarCuarentena(rowData, rowIndex) {
-	data = window.java.sacarCuarentena(rowData.cri_id);
+	var data = window.java.sacarCuarentena(rowData.cri_id);
 
     if(data == 1) {
         Swal.fire({
@@ -295,7 +335,7 @@ function sacarCuarentena(rowData, rowIndex) {
 }
 
 function registrarCuarentena(rowData, rowIndex, dieta) {
-	data = window.java.registrarCuarentena(rowData.cri_id, dieta);
+	var data = window.java.registrarCuarentena(rowData.cri_id, dieta);
 
     if(data == 1) {
         Swal.fire({
@@ -340,7 +380,7 @@ function sacrificar(rowData, rowIndex, bandera) {
         return;
 	}
 	
-	data = window.java.sacrificar(rowData.cri_id);
+	var data = window.java.sacrificar(rowData.cri_id);
 
     if(data == 1) {
         Swal.fire({
@@ -375,7 +415,7 @@ function actualizarFila(rowData, rowIndex) {
 }
 
 function verLog(id) {
-	data = JSON.parse(window.java.cargarMovimientos(id));
+	var data = JSON.parse(window.java.cargarMovimientos(id));
 	
 	var html = '<table class="table"><thead class="thead-light"><tr>'+
     '<th scope="col">Movimiento</th><th scope="col">Fecha</th></thead><tbody>'
@@ -398,7 +438,7 @@ function formatInfo(d, rowIndex) {
 	var formato = '<div class="row">';
 	
 	formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-info"><i class="fa fa-info-circle"></i> Movimientos (LOG)</button></div>';
-	formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-warning" disabled><i class="fa fa-arrow-circle-right"></i> Siguiente proceso</button></div>';
+	formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-warning"><i class="fa fa-arrow-circle-right"></i> Siguiente proceso</button></div>';
 	if(d.est_id == 2) 
 		formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-success"><i class="fa fa-thermometer-full"></i> Mandar a cuarentena</button></div>';
 	else if(d.est_id == 3)

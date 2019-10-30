@@ -25,4 +25,4 @@ GO
 SET ANSI_PADDING OFF
 GO
 
-INSERT INTO Cat_Clasificaciones Values ('Grasa de cobertura 1'), ('Grasa de cobertura 2'), ('Grasa de cobertura 3')
+INSERT INTO Cat_Clasificaciones Values ('Grasa de cobertura-1'), ('Grasa de cobertura-2'), ('Grasa de cobertura-3')

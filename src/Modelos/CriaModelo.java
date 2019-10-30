@@ -113,6 +113,20 @@ public class CriaModelo {
 				
 		return lista;
 	}
+	
+	public int subirProceso(int id) {
+		int resultado = 0;
+		try(Connection con = BDConexion.getConexion("pruebas")) {
+			PreparedStatement ps = con.prepareStatement("EXEC Pa_SubirProceso ?");
+			ps.setInt(1, id);
+			resultado = ps.executeUpdate();
+		}
+		catch(SQLException e) { 
+			System.out.println(e.toString());
+		}
+		finally { BDConexion.cierraConexion(); }
+		return resultado;
+	}
 }
 
 class Cria {

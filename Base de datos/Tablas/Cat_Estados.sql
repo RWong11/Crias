@@ -26,4 +26,4 @@ SET ANSI_PADDING OFF
 GO
 
 
-INSERT INTO Cat_Estados VALUES ('Sana'), ('Apunto de enfermar'), ('Enferma'), ('Sacrificada'), ('Baja')
+INSERT INTO Cat_Estados VALUES ('Sana'), ('Apunto de enfermar'), ('En Cuarentena'), ('Sacrificada'), ('Baja')
