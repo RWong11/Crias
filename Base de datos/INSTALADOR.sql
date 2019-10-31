@@ -1,3 +1,7 @@
+create database pruebas
+GO
+use pruebas
+GO
 SET ANSI_NULLS ON
 GO
 
