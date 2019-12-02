@@ -14,6 +14,8 @@ GO
 CREATE procedure [dbo].[Pa_SacrificarCria] @cri_id int
 AS
 BEGIN
+	/* Condiciones para poder sacrificar 
+	 ... */
 	UPDATE Crias SET cri_estado = 4 WHERE cri_id = @cri_id
 END
 GO

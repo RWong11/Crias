@@ -34,6 +34,9 @@
     tr.shown td.details-control {
         background: url('../Contenido/images/details_close.png') no-repeat center center;
     }
+    #tablaSensores td, th {
+   		text-align: center;   
+	}
 	</style>
   </head>
   <body>
@@ -162,6 +165,69 @@ $( document ).ready(function() {
             }
         })
 	});
+	
+	$(document).on("click", "button.btn-light", function () {
+		var rowIndex = $(this).data('row');
+        var rowData = table.row(rowIndex).data();
+        
+        if(rowData.sensor != 'Ninguno') {
+        	Swal.fire({
+                title: 'Confirmación',
+                html: "Sensor actual:<b> "+rowData.sensor + "</b><br>Presione confirmar si desea remover el sensor",
+                type: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Confirmar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.value) {
+                	if(window.java.asignarSensor(rowData.cri_id, '')) {
+                		Swal.fire({
+          	               type: 'success',
+          	               title: 'Listo',
+          	               text: 'Sensor removido correctamente!',
+          	               timer: 3000
+                          });
+                 		
+                 		rowData.sensor = 'Ninguno';
+                	}
+                }
+            })
+        }
+        else {
+	        (async() => {
+	        	var asigno = false;
+	            const { value: texto } = await Swal.fire({
+	                title: 'Sensor',
+	                input: 'text',
+	                inputPlaceholder: 'Nuevo sensor...',
+	                showCancelButton: true,
+	                inputValidator: (value) => {
+	                	if(!value)
+	                		return 'Escribe algo';
+	                	
+	                	if(!window.java.asignarSensor(rowData.cri_id, value)) {
+	                		return 'El sensor no existe o ya esta asignado a una cria';
+	                	}
+	                	
+	                	asigno = true;
+	                }
+	            })
+	
+	            if(asigno) {
+            		Swal.fire({
+     	               type: 'success',
+     	               title: 'Listo',
+     	               text: 'Sensor ' +texto+ ' Asignado correctamente!',
+     	               timer: 3000
+                     });
+            		
+            		rowData.sensor = texto;
+	            }
+	        })()
+        }
+	});
 });
 
 function menuFiltro() {
@@ -217,11 +283,34 @@ function cargarTabla(valor) {
 	                exportOptions: {
 	                    columns: ':visible'
 	                }
-	            },
+	            }
 	            ]
 			},
 			'pageLength',
-        	'colvis' 
+        	'colvis',
+        	{
+				extend: 'collection',
+                text: 'Acciones',
+                buttons: [
+           		{
+           			text: 'Analizar Crias',
+           			action: function ( e, dt, node, config ) {
+   	                    analizarCrias();
+   	                }
+   	            },
+   	            {
+   	            	text: 'Sensores sin asignar',
+   	            	action: function(e, dt, node, config) {
+   	            		verSensores();
+   	            	}
+   	            },
+   	            {
+   	            	text: 'Otra acción',
+   	                action: function ( e, dt, node, config ) {
+   	                    alert( 'Nada que hacer aún' );
+   	                }
+   	            }]
+        	}
        	],
        	"lengthMenu": [
             [ 10, 25, 50, -1 ],
@@ -281,6 +370,50 @@ function cargarTabla(valor) {
         ],
         "order": [[1, 'desc']]
     } );
+}
+
+function verSensores() {
+	var html = '<table id="tablaSensores" class="table"><thead class="thead-light"><tr>' +
+    '<th scope="col">Numero de Serie</th></tr></thead><tbody>';
+
+	var elementos = JSON.parse(window.java.consultarSensores());
+	elementos.forEach(function(elemento) {
+		html += '<tr><td>' + elemento + '</td></tr>';
+	});
+	
+	html += '</tbody></table>';
+	Swal.fire({
+		title: '<strong>Sensores Sin Asignar</strong>',
+		type: 'info',
+		html: html,
+		customClass: 'swal-wide'
+	})
+}
+
+function analizarCrias() {
+	var data = window.java.analizarCrias();
+	if(data > 0) {
+		table.clear().draw();
+	    table.rows.add(JSON.parse(window.java.cargarCrias(1))); // Add new data
+	    table.columns.adjust().draw(); // Redraw the DataTable
+		table.search('Apunto enfermar').draw();
+		
+		Swal.fire({
+            title: 'Cuidado',
+            text: "Se encontró "+data +" cria"+ (data > 1 ? "s" : "") +" apunto de enfermarse",
+            type: "warning",
+            animation: false,
+            customClass: { popup: 'animated tada' },
+            timer: 5000
+        });
+	} 
+	else 
+		Swal.fire({
+            type: 'success',
+            title: 'Todo bien',
+            text: 'Ninguna cria fina se encuentra en peligro de enfermarse',
+            timer: 4000
+        });
 }
 
 function subirProceso(rowData, rowIndex) {
@@ -438,21 +571,27 @@ function formatInfo(d, rowIndex) {
 	var formato = '<div class="row">';
 	
 	formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-info"><i class="fa fa-info-circle"></i> Movimientos (LOG)</button></div>';
-	formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-warning"><i class="fa fa-arrow-circle-right"></i> Siguiente proceso</button></div>';
 	if(d.est_id == 2) 
 		formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-success"><i class="fa fa-thermometer-full"></i> Mandar a cuarentena</button></div>';
 	else if(d.est_id == 3)
 		formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-success"><i class="fa fa-thermometer-empty"></i> Sacar de cuarentena</button></div>';
-	
+		
 	if(d.est_id != 4) 
 		formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-danger"><i class="fa fa-heart-o"></i> Sacrificar</button></div>';
 		
+	if(d.cla_id == 2)	
+		formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-light"><i class="fa fa-assistive-listening-systems"></i> Sensor</button></div>';
+		
+	if(d.est_id == 1)	
+		formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-warning"><i class="fa fa-arrow-circle-right"></i> Siguiente proceso</button></div>';
+		
 	formato += '</div><br>';
     formato += '<ul class="list-group list-group-horizontal-sm">' +
-                  '<li class="list-group-item"><b>Peso:</b> ' + d.cri_peso +'</li>' +
-                  '<li class="list-group-item"><b>Cantidad de Grasa:</b> ' + d.cri_grasa + '</li>' +
+                  '<li class="list-group-item"><b>Peso:</b> ' + d.cri_peso +'kg</li>' +
+                  '<li class="list-group-item"><b>Cantidad de Grasa:</b> ' + d.cri_grasa + '%</li>' +
                   '<li class="list-group-item"><b>Color del Musculo:</b> ' + d.col_descripcion + '</li>' +
-                  '<li class="list-group-item"><b>Dieta:</b> ' + d.cri_dieta + '</li></ul>';
+                  '<li class="list-group-item"><b>Dieta:</b> ' + d.cri_dieta + '</li>' +
+                  '<li class="list-group-item"><b>Sensor:</b> ' + d.sensor + '</li></ul>';
     return formato;
 }
 </script>

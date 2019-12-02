@@ -34,9 +34,24 @@ public class CriaControlador extends AplControlador {
 		return modelo.sacrificar(id);
 	}
 	
+	public int analizarCrias() {
+		return modelo.analizarCrias();
+	}
+	
+	public int asignarSensor(int id, String nSerie) {
+		return modelo.asignarSensor(id, nSerie);
+//		System.out.println(id);
+//		return id % 2 == 0 ? 1: 0;
+	}
+	
 	public String cargarMovimientos(int id) {
 		String json = new Gson().toJson(modelo.cargarMovimientos(id));
 		//System.out.println("JSON: " +json);
+		return json;
+	}
+	
+	public String consultarSensores() {
+		String json = new Gson().toJson(modelo.consultarSensores());
 		return json;
 	}
 	
