@@ -5,29 +5,27 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gson.Gson;
-
 public class CriaModelo {
-	public int registrarCria(double peso, double grasa, int color) {
-		int resultado = 0;
+	public int[] registrarCria(double peso, double grasa, int color) {
+		int[] resultado = {0, 0};
 		try(Connection con = BDConexion.getConexion("pruebas")) {
-			CallableStatement cs = con.prepareCall("EXEC Pa_RegistrarCria ?, ?, ?");
+			CallableStatement cs = con.prepareCall("EXEC Pa_RegistrarCria ?, ?, ?, ?, ?");
 			cs.setDouble(1, peso);
 			cs.setDouble(2, grasa);
 			cs.setInt(3, color);
-
-			ResultSet rs = cs.executeQuery();
-			if(rs.next()) 
-				resultado = rs.getInt(1);
+			cs.registerOutParameter(4, java.sql.Types.INTEGER);
+			cs.registerOutParameter(5, java.sql.Types.INTEGER);
+			
+			cs.execute();
+			resultado[0] = cs.getInt(4);
+			resultado[1] = cs.getInt(5);
 		}
 		catch(SQLException e) { 
 			System.out.println(e.toString());
-			resultado = 0;
+			resultado[1] = 0;
 		}
 		finally { BDConexion.cierraConexion(); }
 		

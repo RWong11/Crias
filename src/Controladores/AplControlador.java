@@ -29,6 +29,10 @@ public class AplControlador extends ScriptContextAdapter {
 		AplControlador aplControlador = new AplControlador(aplicacion);
 		if(controlador.equals("Crias")) 
 			aplControlador = new CriaControlador(aplicacion);
+		
+		else if(controlador.equals("Inventario"))
+			aplControlador = new InventarioControlador(aplicacion);
+		
 		else if(controlador.equals("Otro")) {
 			
 		}

@@ -12,10 +12,9 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE procedure [dbo].[Pa_RegistrarCria] @cri_peso float, @cri_grasa float, @cri_color int
+CREATE procedure [dbo].[Pa_RegistrarCria] @cri_peso float, @cri_grasa float, @cri_color int, @cri_clasificacion int OUTPUT, @cri_id int OUTPUT
 AS
 BEGIN
-	DECLARE @cri_clasificacion int
 	if(@cri_peso < 20)
 		SET @cri_clasificacion = 1
 	else if(@cri_peso < 50)
@@ -23,14 +22,26 @@ BEGIN
 	else
 		SET @cri_clasificacion = 3
 
-	SELECT @cri_clasificacion as Clasificacion /* Seleccionamos la clasificacion para retornarla desde la aplicación */
-	INSERT INTO Crias (cri_clasificacion, cri_peso, cri_grasa, cri_color)
-	VALUES (@cri_clasificacion, @cri_peso, @cri_grasa, @cri_color)
+	DECLARE @CriaTabla table(id int)
 
-	/* La hacemos iniciar en el proceso 1 */
-	DECLARE @cri_id int = scope_identity()
-	INSERT INTO Procesos_Cria (pro_cria, pro_numero, pro_fechaInicio) 
-	VALUES (@cri_id, 1, GETDATE())
+	begin try
+		begin tran
+			INSERT INTO Crias (cri_clasificacion, cri_peso, cri_grasa, cri_color)
+			OUTPUT inserted.cri_id INTO @CriaTabla
+			VALUES (@cri_clasificacion, @cri_peso, @cri_grasa, @cri_color)
+
+			SET @cri_id = (SELECT id FROM @CriaTabla)
+
+			-- La hacemos iniciar en el proceso 1 
+			INSERT INTO Procesos_Cria (pro_cria, pro_numero, pro_fechaInicio) 
+			VALUES (@cri_id, 1, GETDATE())
+
+		commit tran
+	end try
+	begin catch
+		rollback tran
+		SET @cri_id = 0
+	end catch
 END
 GO
 

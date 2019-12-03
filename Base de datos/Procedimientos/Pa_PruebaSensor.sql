@@ -16,7 +16,7 @@ AS
 BEGIN
 	DECLARE @id INT, @num INT
 	SET @count = 0
-	DECLARE CriasFinas CURSOR FOR SELECT sen_cria FROM Cat_Sensores INNER JOIN Crias ON (sen_cria = cri_id) WHERE cri_clasificacion = 2 AND cri_estado = 1
+	DECLARE CriasFinas CURSOR FOR SELECT sen_cria FROM Cat_Sensores INNER JOIN Crias ON (sen_cria = cri_id) WHERE cri_estado = 1
 	OPEN CriasFinas
 	FETCH NEXT FROM CriasFinas INTO @id
 	WHILE @@fetch_status = 0

@@ -18,20 +18,24 @@ BEGIN
 					INNER JOIN Procesos_Cria ON (cri_id = pro_cria AND pro_numero = proceso_actual) 
 					WHERE cri_id = @cri_id AND est_id = 1 AND @FechaActual >= DATEADD(MINUTE/*MONTH*/, 5, pro_fechainicio))
 		BEGIN
-			UPDATE Procesos_Cria SET pro_fechaTermino = @FechaActual WHERE pro_cria = @cri_id AND pro_numero = @proceso
-			INSERT INTO Procesos_Cria (pro_cria, pro_numero, pro_fechaInicio) VALUES (@cri_id, @proceso + 1, @FechaActual)
+			BEGIN TRY
+				BEGIN TRAN
+					UPDATE Procesos_Cria SET pro_fechaTermino = @FechaActual WHERE pro_cria = @cri_id AND pro_numero = @proceso
+					INSERT INTO Procesos_Cria (pro_cria, pro_numero, pro_fechaInicio) VALUES (@cri_id, @proceso + 1, @FechaActual)
+				COMMIT TRAN
+			END TRY
+			BEGIN CATCH
+				ROLLBACK TRAN
+			END CATCH
 		END
 	END
-	else if(@proceso = 2)
+	/*else if(@proceso = 2)
 	BEGIN
-		SELECT -1
 	END	
 	else if(@proceso = 3)
 	BEGIN
-		SELECT -1
 	END	
 	else if(@proceso = 4)
 	BEGIN
-		SELECT -1
-	END	
+	END	*/
 END

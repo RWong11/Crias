@@ -55,18 +55,18 @@ function registrarCria() {
 	var grasa = parseFloat($("#inputGrasa").val());
 	var color = parseInt($("#inputColor").val());
 
-	var resultado = window.java.registrarCria(peso, grasa, color);
-	if(resultado > 0) {
+	var resultado = JSON.parse(window.java.registrarCria(peso, grasa, color));
+	if(resultado[1] > 0) {
 		Swal.fire({
 		  type: 'success',	
-		  title: 'Cria registrada correctamente!',
+		  title: 'Cria (#'+resultado[1]+') registrada correctamente!',
 		  animation: false,
 		  timer: 4000,
 		  customClass: {
 		    popup: 'animated bounceInDown'
 		  },
 		  onClose: () => {
-			  if(resultado == 2)
+			  if(resultado[0] == 2)
               	alertaSensor();
           	}
 		});

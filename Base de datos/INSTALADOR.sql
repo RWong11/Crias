@@ -126,11 +126,12 @@ GO
 
 create table Cat_Sensores (
 sen_numSerie varchar(10) PRIMARY KEY,
-sen_cria int null foreign key references Crias(cri_id)
+sen_cria int null foreign key references Crias(cri_id),
+baja bit default 0
 )
 GO
 
-insert into Cat_Sensores (sen_numSerie) VALUES ('HAT4PBK89Z'), ('CG5FJF2PCU'), ('ENYUMP3YQY'), ('7GQ2EQLSS2'), ('8XDR66VP76'), ('XD52T8HYTK'), ('VCHESBDV55'), ('42ZKCVLXER'), ('2W7KBWZAX9'), ('C52J53XG3D')
+insert into Cat_Sensores (sen_numSerie) VALUES ('HAT4PBK89Z'), ('CG5FJF2PCU'), ('ENYUMP3YQY'), ('7GQ2EQLSS2'), ('8XDR66VP76'), ('XD52T8HYTK'), ('VCHESBDV55'), ('42ZKCVLXER'), ('2W7KBWZAX9'), ('C52J53XG3D'), ('A41B53XG3D'), ('Z11H53XG3D')
 GO
 
 CREATE TABLE [dbo].[Enfermedades_Cria](
@@ -274,7 +275,7 @@ AS
 BEGIN
 	DECLARE @id INT, @num INT
 	SET @count = 0
-	DECLARE CriasFinas CURSOR FOR SELECT sen_cria FROM Cat_Sensores INNER JOIN Crias ON (sen_cria = cri_id) WHERE cri_clasificacion = 2 AND cri_estado = 1
+	DECLARE CriasFinas CURSOR FOR SELECT sen_cria FROM Cat_Sensores INNER JOIN Crias ON (sen_cria = cri_id) WHERE cri_estado = 1
 	OPEN CriasFinas
 	FETCH NEXT FROM CriasFinas INTO @id
 	WHILE @@fetch_status = 0
@@ -303,10 +304,9 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE procedure [dbo].[Pa_RegistrarCria] @cri_peso float, @cri_grasa float, @cri_color int
+CREATE procedure [dbo].[Pa_RegistrarCria] @cri_peso float, @cri_grasa float, @cri_color int, @cri_clasificacion int OUTPUT, @cri_id int OUTPUT
 AS
 BEGIN
-	DECLARE @cri_clasificacion int
 	if(@cri_peso < 20)
 		SET @cri_clasificacion = 1
 	else if(@cri_peso < 50)
@@ -314,14 +314,26 @@ BEGIN
 	else
 		SET @cri_clasificacion = 3
 
-	SELECT @cri_clasificacion as Clasificacion /* Seleccionamos la clasificacion para retornarla desde la aplicación */
-	INSERT INTO Crias (cri_clasificacion, cri_peso, cri_grasa, cri_color)
-	VALUES (@cri_clasificacion, @cri_peso, @cri_grasa, @cri_color)
+	DECLARE @CriaTabla table(id int)
 
-	/* La hacemos iniciar en el proceso 1 */
-	DECLARE @cri_id int = scope_identity()
-	INSERT INTO Procesos_Cria (pro_cria, pro_numero, pro_fechaInicio) 
-	VALUES (@cri_id, 1, GETDATE())
+	begin try
+		begin tran
+			INSERT INTO Crias (cri_clasificacion, cri_peso, cri_grasa, cri_color)
+			OUTPUT inserted.cri_id INTO @CriaTabla
+			VALUES (@cri_clasificacion, @cri_peso, @cri_grasa, @cri_color)
+
+			SET @cri_id = (SELECT id FROM @CriaTabla)
+
+			-- La hacemos iniciar en el proceso 1 
+			INSERT INTO Procesos_Cria (pro_cria, pro_numero, pro_fechaInicio) 
+			VALUES (@cri_id, 1, GETDATE())
+
+		commit tran
+	end try
+	begin catch
+		rollback tran
+		SET @cri_id = 0
+	end catch
 END
 GO
 
@@ -339,14 +351,20 @@ GO
 CREATE procedure [dbo].[Pa_RegistrarCuarentena] @cri_id int, @dieta varchar(256)
 AS
 BEGIN
+	begin try
+		begin tran
+			IF NOT EXISTS(SELECT enf_cria FROM Enfermedades_Cria WITH(UPDLOCK) WHERE enf_cria = @cri_id AND enf_fechaRecupero is null)
+			BEGIN
+				INSERT INTO Enfermedades_Cria (enf_cria, enf_fechaInicio, enf_alimentacion) 
+				VALUES (@cri_id, GETDATE(), @dieta)
 
-	IF NOT EXISTS(SELECT enf_cria FROM Enfermedades_Cria WHERE enf_cria = @cri_id AND enf_fechaRecupero is null)
-	BEGIN
-		INSERT INTO Enfermedades_Cria (enf_cria, enf_fechaInicio, enf_alimentacion) 
-		VALUES (@cri_id, GETDATE(), @dieta)
-
-		UPDATE Crias SET cri_estado = 3, cri_corral = 2 WHERE cri_id = @cri_id
-	END
+				UPDATE Crias SET cri_estado = 3, cri_corral = 2 WHERE cri_id = @cri_id
+			END
+		commit tran
+	end try
+	begin catch
+		rollback tran
+	end catch
 END
 GO
 
@@ -424,22 +442,26 @@ BEGIN
 					INNER JOIN Procesos_Cria ON (cri_id = pro_cria AND pro_numero = proceso_actual) 
 					WHERE cri_id = @cri_id AND est_id = 1 AND @FechaActual >= DATEADD(MINUTE/*MONTH*/, 5, pro_fechainicio))
 		BEGIN
-			UPDATE Procesos_Cria SET pro_fechaTermino = @FechaActual WHERE pro_cria = @cri_id AND pro_numero = @proceso
-			INSERT INTO Procesos_Cria (pro_cria, pro_numero, pro_fechaInicio) VALUES (@cri_id, @proceso + 1, @FechaActual)
+			BEGIN TRY
+				BEGIN TRAN
+					UPDATE Procesos_Cria SET pro_fechaTermino = @FechaActual WHERE pro_cria = @cri_id AND pro_numero = @proceso
+					INSERT INTO Procesos_Cria (pro_cria, pro_numero, pro_fechaInicio) VALUES (@cri_id, @proceso + 1, @FechaActual)
+				COMMIT TRAN
+			END TRY
+			BEGIN CATCH
+				ROLLBACK TRAN
+			END CATCH
 		END
 	END
-	else if(@proceso = 2)
+	/*else if(@proceso = 2)
 	BEGIN
-		SELECT -1
 	END	
 	else if(@proceso = 3)
 	BEGIN
-		SELECT -1
 	END	
 	else if(@proceso = 4)
 	BEGIN
-		SELECT -1
-	END	
+	END	*/
 END
 GO
 IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_AsignarSensor' AND xtype = 'P')
@@ -465,6 +487,39 @@ create procedure Pa_ConsSensoresLibres
 AS
 BEGIN
 	SELECT Sen_NumSerie FROM Cat_Sensores where Sen_Cria is null
+END
+GO
+IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_CargarSensores' AND xtype = 'P')
+	BEGIN 
+		DROP PROCEDURE dbo.Pa_CargarSensores
+	END
+GO
+create procedure Pa_CargarSensores
+AS
+BEGIN
+	SELECT sen_numSerie FROM Cat_Sensores where baja = 0
+END
+GO
+IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_RegistrarSensor' AND xtype = 'P')
+	BEGIN 
+		DROP PROCEDURE dbo.Pa_RegistrarSensor
+	END
+GO
+create procedure Pa_RegistrarSensor @numSerie varchar(10)
+AS
+BEGIN
+	INSERT INTO Cat_Sensores (sen_numSerie) VALUES (@numSerie)
+END
+GO
+IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_EliminarSensor' AND xtype = 'P')
+	BEGIN 
+		DROP PROCEDURE dbo.Pa_EliminarSensor
+	END
+GO
+create procedure Pa_EliminarSensor @numSerie varchar(10)
+AS
+BEGIN
+	UPDATE Cat_Sensores SET baja = 1 WHERE sen_numSerie = @numSerie and sen_cria is null
 END
 GO
 CREATE TRIGGER Tri_CriasEstados ON Crias AFTER UPDATE

@@ -419,7 +419,7 @@ function analizarCrias() {
 function subirProceso(rowData, rowIndex) {
 	var data = window.java.subirProceso(rowData.cri_id);
 	
-	if(data == 1) {
+	if(data > 0) {
 		var proceso = "P" +(rowData.proceso_actual+1);
         Swal.fire({
             type: 'success',
@@ -444,7 +444,7 @@ function subirProceso(rowData, rowIndex) {
 function sacarCuarentena(rowData, rowIndex) {
 	var data = window.java.sacarCuarentena(rowData.cri_id);
 
-    if(data == 1) {
+    if(data > 0) {
         Swal.fire({
             type: 'success',
             title: 'Listo',
