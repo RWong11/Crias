@@ -191,6 +191,7 @@ $( document ).ready(function() {
                           });
                  		
                  		rowData.sensor = 'Ninguno';
+                 		actualizarFila(rowData, rowIndex);
                 	}
                 }
             })
@@ -224,6 +225,7 @@ $( document ).ready(function() {
                      });
             		
             		rowData.sensor = texto;
+            		actualizarFila(rowData, rowIndex);
 	            }
 	        })()
         }
@@ -568,24 +570,24 @@ function verLog(id) {
 }
 
 function formatInfo(d, rowIndex) {
-	var formato = '<div class="row">';
+	var formato = '&nbsp;';
 	
-	formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-info"><i class="fa fa-info-circle"></i> Movimientos (LOG)</button></div>';
+	formato += '<button data-row='+rowIndex+' class="btn btn-info"><i class="fa fa-info-circle"></i> Movimientos (LOG)</button>&nbsp;';
 	if(d.est_id == 2) 
-		formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-success"><i class="fa fa-thermometer-full"></i> Mandar a cuarentena</button></div>';
+		formato += '<button data-row='+rowIndex+' class="btn btn-success"><i class="fa fa-thermometer-full"></i> Mandar a cuarentena</button>&nbsp;';
 	else if(d.est_id == 3)
-		formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-success"><i class="fa fa-thermometer-empty"></i> Sacar de cuarentena</button></div>';
+		formato += '<button data-row='+rowIndex+' class="btn btn-success"><i class="fa fa-thermometer-empty"></i> Sacar de cuarentena</button>&nbsp;';
 		
 	if(d.est_id != 4) 
-		formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-danger"><i class="fa fa-heart-o"></i> Sacrificar</button></div>';
+		formato += '<button data-row='+rowIndex+' class="btn btn-danger"><i class="fa fa-heart-o"></i> Sacrificar</button>&nbsp;';
 		
 	if(d.cla_id == 2)	
-		formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-light"><i class="fa fa-assistive-listening-systems"></i> Sensor</button></div>';
+		formato += '<button data-row='+rowIndex+' class="btn btn-light"><i class="fa fa-assistive-listening-systems"></i> Sensor</button>&nbsp;';
 		
 	if(d.est_id == 1)	
-		formato += '<div class="col-3"><button data-row='+rowIndex+' class="btn btn-warning"><i class="fa fa-arrow-circle-right"></i> Siguiente proceso</button></div>';
+		formato += '<button data-row='+rowIndex+' class="btn btn-warning"><i class="fa fa-arrow-circle-right"></i> Siguiente proceso</button>&nbsp;';
 		
-	formato += '</div><br>';
+	formato += '<br>';
     formato += '<ul class="list-group list-group-horizontal-sm">' +
                   '<li class="list-group-item"><b>Peso:</b> ' + d.cri_peso +'kg</li>' +
                   '<li class="list-group-item"><b>Cantidad de Grasa:</b> ' + d.cri_grasa + '%</li>' +
