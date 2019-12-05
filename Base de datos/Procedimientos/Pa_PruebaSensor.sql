@@ -14,21 +14,19 @@ GO
 create procedure Pa_PruebaSensor @count INT OUTPUT
 AS
 BEGIN
-	DECLARE @id INT, @num INT
-	SET @count = 0
-	DECLARE CriasFinas CURSOR FOR SELECT sen_cria FROM Cat_Sensores INNER JOIN Crias ON (sen_cria = cri_id) WHERE cri_estado = 1
-	OPEN CriasFinas
-	FETCH NEXT FROM CriasFinas INTO @id
-	WHILE @@fetch_status = 0
-	BEGIN
-		SET @num = FLOOR(RAND()*6)
-		IF @num = 3
-		BEGIN
-			UPDATE Crias SET cri_estado = 2 WHERE cri_id = @id
-			SET @count = @count +1
-		END
-		FETCH NEXT FROM CriasFinas INTO @id
-	END
-	CLOSE CriasFinas
-	DEALLOCATE CriasFinas
+	INSERT INTO DatosSensor 
+	SELECT sen_numSerie, sen_cria, GETDATE(), (ABS(CHECKSUM(NewId())) % 11)+35 FROM Cat_Sensores WHERE sen_cria is not null
+
+	DECLARE @FechaHoy varchar(32) = convert(varchar, GETDATE(), 111)
+	UPDATE Crias SET cri_estado = 2 WHERE cri_id IN (
+	--DECLARE @FechaHoy varchar(32) = convert(varchar, GETDATE(), 111) -- DECLARE @FechaHoy varchar(32) = convert(varchar, DATEADD(day, 1, GETDATE()), 111)
+			SELECT ds_cria FROM DatosSensor
+			INNER JOIN Crias ON (ds_cria = cri_id)
+			WHERE cri_estado = 1
+			GROUP BY ds_numSerie, ds_cria, convert(varchar, ds_fecha, 111)
+			HAVING convert(varchar, ds_fecha, 111) = @FechaHoy AND AVG(ds_temperatura) >= 40
+		)
+
+	SELECT @count = COUNT(cri_id) FROM Crias WHERE cri_estado = 2
 END
+

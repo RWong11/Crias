@@ -14,8 +14,11 @@ GO
 CREATE procedure [dbo].[Pa_SacrificarCria] @cri_id int
 AS
 BEGIN
-	/* Condiciones para poder sacrificar 
-	 ... */
-	UPDATE Crias SET cri_estado = 4 WHERE cri_id = @cri_id
+	DECLARE @cri_clasificacion int, @cri_estado int 
+	SELECT @cri_clasificacion = cri_clasificacion, @cri_estado = cri_estado FROM Crias WHERE cri_id = @cri_id
+
+	IF (@cri_clasificacion != 2 OR (@cri_estado = 3 AND 
+	 (SELECT DATEDIFF(day, enf_fechaInicio, GETDATE()) FROM Enfermedades_Cria WHERE enf_cria = @cri_id AND enf_fechaRecupero is null)  > 40)) 
+		UPDATE Crias SET cri_estado = 4 WHERE cri_id = @cri_id
 END
 GO

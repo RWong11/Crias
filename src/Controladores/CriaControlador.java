@@ -6,21 +6,30 @@ import Aplicacion.Aplicacion;
 import Modelos.CriaModelo;
 
 public class CriaControlador extends AplControlador {
+	static int draw = 0;
+	private static final String COLUMNAS[] = { "", "cri_id", "cla_id", "est_id", "cor_id", "ciu_descripcion", "proceso_actual" };
 	private CriaModelo modelo = new CriaModelo();
 	
 	public CriaControlador(Aplicacion aplicacion) {
 		super(aplicacion);
 	}
 
-	public String registrarCria(double peso, double grasa, int color) {
-		String json = new Gson().toJson(modelo.registrarCria(peso, grasa, color));
+	public String registrarCria(double peso, double grasa, int color, int ciudad) {
+		String json = new Gson().toJson(modelo.registrarCria(peso, grasa, color, ciudad));
 		//System.out.println(json);
 		return json;
 	}
 	
 	public String cargarCrias(int num) {
 		String json = new Gson().toJson(modelo.cargarCrias(num));
-		//System.out.println("JSON: " +json);
+		System.out.println("JSON: " +json);
+		return json;
+	}
+	
+	public String json(int draw, String search, int columna, String orderDir, int startRec, int pageSize, String clasificacion, String estado, String ciudad, String proceso) {
+		String order = COLUMNAS[columna];
+		String json = new Gson().toJson(modelo.cargarCrias_SS(draw, search, order, orderDir, startRec, pageSize, clasificacion, estado, ciudad, proceso));
+		System.out.println("JSON: " +json);
 		return json;
 	}
 	

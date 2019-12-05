@@ -12,7 +12,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE procedure [dbo].[Pa_RegistrarCria] @cri_peso float, @cri_grasa float, @cri_color int, @cri_clasificacion int OUTPUT, @cri_id int OUTPUT
+CREATE procedure [dbo].[Pa_RegistrarCria] @cri_peso float, @cri_grasa float, @cri_color int, @cri_ciudad int, @cri_clasificacion int OUTPUT, @cri_id int OUTPUT
 AS
 BEGIN
 	if(@cri_peso < 20)
@@ -26,9 +26,9 @@ BEGIN
 
 	begin try
 		begin tran
-			INSERT INTO Crias (cri_clasificacion, cri_peso, cri_grasa, cri_color)
+			INSERT INTO Crias (cri_clasificacion, cri_peso, cri_grasa, cri_color, cri_ciudad)
 			OUTPUT inserted.cri_id INTO @CriaTabla
-			VALUES (@cri_clasificacion, @cri_peso, @cri_grasa, @cri_color)
+			VALUES (@cri_clasificacion, @cri_peso, @cri_grasa, @cri_color, @cri_ciudad)
 
 			SET @cri_id = (SELECT id FROM @CriaTabla)
 

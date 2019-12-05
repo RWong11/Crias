@@ -436,7 +436,7 @@ BEGIN
 		BEGIN TRAN
 			DECLARE @FechaActual datetime = GETDATE()
 			DECLARE @proceso int
-			SELECT @proceso = proceso_actual FROM Vi_Crias WITH(UPDLOCK) WHERE cri_id = @cri_id
+			SELECT @proceso = MAX(pro_numero) FROM Procesos_Cria WITH(UPDLOCK) WHERE pro_cria = @cri_id
 
 			if(@proceso = 1)
 			BEGIN

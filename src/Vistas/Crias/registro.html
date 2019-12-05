@@ -35,6 +35,14 @@
 	                 </select>
 	                </div>
                </div>
+               <div class="form-group row">
+	               	<label for="inputCiudad" class="col-sm-3 col-form-label">Ciudad de Origen: </label>
+	                <div class="col-sm-9">
+	                 <select id="inputCiudad" class="form-control" required>
+	                 	<option value="" selected disabled>Seleccione una Ciudad</option>
+	                 </select>
+	                </div>
+               </div>
                <button id="botonRegistrar" type="submit" class="btn btn-primary">Registrar</button>
            </form>
        </div>
@@ -42,7 +50,8 @@
   </body>
 <script>
 $(document).ready(function() {
-	cargarColores();
+	cargarLista(1, $("#inputColor"));
+	cargarLista(2, $("#inputCiudad"));
 	
 	 $("#formCrias").submit(function(event) {
 		 event.preventDefault();
@@ -54,8 +63,9 @@ function registrarCria() {
 	var peso = parseFloat($("#inputPeso").val());
 	var grasa = parseFloat($("#inputGrasa").val());
 	var color = parseInt($("#inputColor").val());
+	var ciudad = parseInt($("#inputCiudad").val());
 
-	var resultado = JSON.parse(window.java.registrarCria(peso, grasa, color));
+	var resultado = JSON.parse(window.java.registrarCria(peso, grasa, color, ciudad));
 	if(resultado[1] > 0) {
 		Swal.fire({
 		  type: 'success',	
@@ -98,10 +108,10 @@ function alertaSensor() {
 		});
 }
 
-function cargarColores() {
-	var elementos = JSON.parse(window.java.cargarLista(1));
+function cargarLista(num, select) {
+	var elementos = JSON.parse(window.java.cargarLista(num));
 	elementos.forEach(function(elemento, index) {
-		$("#inputColor").append(new Option(elemento.text, elemento.value));
+		select.append(new Option(elemento.text, elemento.value));
 	});
 }
 

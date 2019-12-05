@@ -9,19 +9,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CriaModelo {
-	public int[] registrarCria(double peso, double grasa, int color) {
+	public int[] registrarCria(double peso, double grasa, int color, int ciudad) {
 		int[] resultado = {0, 0};
 		try(Connection con = BDConexion.getConexion("pruebas")) {
-			CallableStatement cs = con.prepareCall("EXEC Pa_RegistrarCria ?, ?, ?, ?, ?");
+			CallableStatement cs = con.prepareCall("EXEC Pa_RegistrarCria ?, ?, ?, ?, ?, ?");
 			cs.setDouble(1, peso);
 			cs.setDouble(2, grasa);
 			cs.setInt(3, color);
-			cs.registerOutParameter(4, java.sql.Types.INTEGER);
+			cs.setInt(4, ciudad);
 			cs.registerOutParameter(5, java.sql.Types.INTEGER);
+			cs.registerOutParameter(6, java.sql.Types.INTEGER);
 			
 			cs.execute();
-			resultado[0] = cs.getInt(4);
-			resultado[1] = cs.getInt(5);
+			resultado[0] = cs.getInt(5);
+			resultado[1] = cs.getInt(6);
 		}
 		catch(SQLException e) { 
 			System.out.println(e.toString());
@@ -40,7 +41,7 @@ public class CriaModelo {
 			ResultSet rs = ps.executeQuery();
 			while(rs.next())
 				lista.add(new Cria(rs.getInt("cri_id"), rs.getInt("cla_id"), rs.getString("cla_descripcion"), rs.getDouble("cri_peso"), rs.getDouble("cri_grasa"), rs.getInt("col_id"), rs.getString("col_descripcion"), 
-						rs.getInt("est_id"), rs.getString("est_descripcion"), rs.getInt("cor_id"), rs.getString("cor_descripcion"), rs.getString("dieta"), rs.getInt("proceso_actual"), rs.getString("sensor")));
+						rs.getInt("est_id"), rs.getString("est_descripcion"), rs.getInt("cor_id"), rs.getString("cor_descripcion"), rs.getString("ciu_descripcion"), rs.getString("dieta"), rs.getInt("proceso_actual"), rs.getString("sensor")));
 		}
 		catch(SQLException e) { 
 			System.out.println(e.toString());
@@ -48,6 +49,41 @@ public class CriaModelo {
 		finally { BDConexion.cierraConexion(); }
 				
 		return lista;
+	}
+	
+	public JsonCrias cargarCrias_SS(int draw, String search, String order, String orderDir, int startRec, int pageSize, String clasificacion, String estado, String ciudad, String proceso) {
+		int total = 0;
+		int totalFiltrado = 0;
+		List<Cria> lista = new ArrayList<Cria>();
+		try(Connection con = BDConexion.getConexion("pruebas")) {
+			CallableStatement cs = con.prepareCall("EXEC Pa_CargarCrias_ServerSide ?, ?, ?, ?, ?, ?, ?, ?, ?, ?");
+			cs.setString(1, search);
+			cs.setString(2, order);
+			cs.setString(3, orderDir);
+			cs.setInt(4, startRec);
+			cs.setInt(5, pageSize);
+			cs.setString(6, clasificacion);
+			cs.setString(7, estado);
+			cs.setString(8, ciudad);
+			cs.setString(9, proceso);
+			cs.registerOutParameter(10, java.sql.Types.INTEGER);
+			
+			ResultSet rs = cs.executeQuery();
+			while(rs.next()) {
+				lista.add(new Cria(rs.getInt("cri_id"), rs.getInt("cla_id"), rs.getString("cla_descripcion"), rs.getDouble("cri_peso"), rs.getDouble("cri_grasa"), rs.getInt("col_id"), rs.getString("col_descripcion"), 
+						rs.getInt("est_id"), rs.getString("est_descripcion"), rs.getInt("cor_id"), rs.getString("cor_descripcion"), rs.getString("ciu_descripcion"), rs.getString("dieta"), rs.getInt("proceso_actual"), rs.getString("sensor")));
+				
+				if(totalFiltrado == 0) 
+					totalFiltrado = rs.getInt("totalFiltrado");
+			}
+			total = cs.getInt(10);
+		}
+		catch(SQLException e) { 
+			//System.out.println(e.toString());
+		}
+		finally { BDConexion.cierraConexion(); }
+				
+		return new JsonCrias(draw, total, totalFiltrado, lista);
 	}
 	
 	public int registrarCuarentena(int id, String dieta) {
@@ -186,11 +222,12 @@ class Cria {
 	private String est_descripcion;
 	private int cor_id;
 	private String cor_descripcion;
+	private String ciu_descripcion;
 	private String cri_dieta;
 	private int proceso_actual;
 	private String sensor;
 	
-	public Cria(int cri_id, int cla_id, String cla_descripcion, double cri_peso, double cri_grasa, int col_id, String col_descripcion, int est_id, String est_descripcion, int cor_id, String cor_descripcion, String cri_dieta, int proceso_actual, String sensor) {
+	public Cria(int cri_id, int cla_id, String cla_descripcion, double cri_peso, double cri_grasa, int col_id, String col_descripcion, int est_id, String est_descripcion, int cor_id, String cor_descripcion, String ciu_descripcion, String cri_dieta, int proceso_actual, String sensor) {
 		this.cri_id = cri_id;
 		this.cla_id = cla_id;
 		this.cla_descripcion = cla_descripcion;
@@ -202,9 +239,24 @@ class Cria {
 		this.est_descripcion = est_descripcion;
 		this.cor_id = cor_id;
 		this.cor_descripcion = cor_descripcion;
+		this.ciu_descripcion = ciu_descripcion;
 		this.cri_dieta = cri_dieta;
 		this.proceso_actual = proceso_actual;
 		this.sensor = sensor;
+	}
+}
+
+class JsonCrias {
+	private int draw;
+	private int recordsTotal;
+	private int recordsFiltered;
+	private List<Cria> data;
+	
+	public JsonCrias(int draw, int recordsTotal, int recordsFiltered, List<Cria> data) {
+		this.draw = draw;
+		this.recordsTotal = recordsTotal;
+		this.recordsFiltered = recordsFiltered;
+		this.data = data;
 	}
 }
 

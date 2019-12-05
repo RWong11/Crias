@@ -1,18 +1,18 @@
 USE [pruebas]
 GO
 IF EXISTS (SELECT NAME FROM SYSOBJECTS WHERE NAME = 'Pa_SubirProceso' AND xtype = 'P')
-	BEGIN 
+	BEGIN  
 		DROP PROCEDURE dbo.Pa_SubirProceso
 	END
 GO
 create procedure Pa_SubirProceso @cri_id int
 AS
 BEGIN
-	BEGIN TRY
+	BEGIN TRY 
 		BEGIN TRAN
 			DECLARE @FechaActual datetime = GETDATE()
 			DECLARE @proceso int
-			SELECT @proceso = proceso_actual FROM Vi_Crias WITH(UPDLOCK) WHERE cri_id = @cri_id
+			SELECT @proceso = MAX(pro_numero) FROM Procesos_Cria WITH(UPDLOCK) WHERE pro_cria = @cri_id
 
 			if(@proceso = 1)
 			BEGIN

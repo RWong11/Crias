@@ -49,29 +49,51 @@
             	<th>No. Cria</th>
                 <th>Clasificación</th>
                 <th>Estado</th>
+                <th>Ciudad</th>
                 <th>Corral</th>
                 <th>Proceso actual</th>
             </tr>
         </thead>
         <tbody></tbody>
         <tfoot>
-            <tr>
-                <th>+</th>
-                <th>No. Cria</th>
-                <th>Clasificación</th>
-                <th>Estado</th>
-                <th>Corral</th>
-                <th>Proceso actual</th>
+        	<tr>
+        		<th></th>
+           		<th></th>
+            	<th><select id="inputClasificacion" class="form-control" autocomplete="on">
+	                 	<option value="cla_id" selected>Cualquiera</option>
+	                 </select></th>
+            	<th><select id="inputEstado" class="form-control" autocomplete="on">
+	                 	<option value="est_id" selected>Cualquiera</option>
+	                 </select></th>
+                <th><select id="inputCiudad" class="form-control" autocomplete="on">
+	                 	<option value="ciu_id" selected>Cualquiera</option>
+	                 </select></th>
+                <th></th>
+                <th><select id="inputProceso" class="form-control" autocomplete="on">
+	                 	<option value="proceso_actual" selected>Cualquiera</option>
+	                 	<option value="1">P1</option>
+	                 	<option value="2">P2</option>
+	                 	<option value="3">P3</option>
+	                 	<option value="4">P4</option>
+	                 	<option value="5">P5</option>
+	                 </select></th>
             </tr>
-        </tfoot>
+         </tfoot>
     </table>
     </div>
   </body>
 <script>
 var table;
 $( document ).ready(function() {
+	cargarLista(2, $("#inputCiudad"));
+	cargarLista(3, $("#inputClasificacion"));
+	cargarLista(4, $("#inputEstado"));
 	
-	menuFiltro();
+	$("#inputCiudad,#inputClasificacion,#inputEstado,#inputProceso").change(function() {
+		table.ajax.reload();
+	})
+	
+	cargarTabla(1);
 	$('#tablaCrias tbody').on('click', 'td.details-control', function () {
         var tr = $(this).closest('tr');
         var row = table.row(tr);
@@ -190,8 +212,7 @@ $( document ).ready(function() {
           	               timer: 3000
                           });
                  		
-                 		rowData.sensor = 'Ninguno';
-                 		actualizarFila(rowData, rowIndex);
+                 		table.ajax.reload(null, false);
                 	}
                 }
             })
@@ -224,35 +245,15 @@ $( document ).ready(function() {
      	               timer: 3000
                      });
             		
-            		rowData.sensor = texto;
-            		actualizarFila(rowData, rowIndex);
+            		table.ajax.reload(null, false);
 	            }
 	        })()
         }
 	});
 });
 
-function menuFiltro() {
-	(async () => {
-		const { value: valor } = await Swal.fire({
-		  title: 'Consulta Crias',
-		  input: 'select',
-		  inputOptions: {
-		    1: 'Todas',
-		    2: 'Permanecieron mas de 5 meses'
-		  },
-		  inputPlaceholder: 'Seleccione una opcion',
-		})
-
-		if (valor) 
-			cargarTabla(valor);
-		else 
-			menuFiltro();
-	})()
-}
-
 function cargarTabla(valor) {
-	var data = JSON.parse(window.java.cargarCrias(parseInt(valor)));
+	//var data = JSON.parse(window.java.cargarCrias(parseInt(valor)));
 	table = $('#tablaCrias').DataTable( {
 		"dom": 'Bfrtip',
 		lengthChange: false,
@@ -329,7 +330,7 @@ function cargarTabla(valor) {
             "lengthMenu":     "Visualizar _MENU_ registros por pagina",
             "loadingRecords": "Cargando...",
             "processing":     "Procesando...",
-            "search":         "Buscar:",
+            "search":         "#No. Cria:",
             "zeroRecords":    "No se encontro ningun registro que coincida con su busqueda",
             "paginate": {
                 "first":      "Primera",
@@ -350,7 +351,16 @@ function cargarTabla(valor) {
                 }
             }
         },
-        "data": data,
+        "processing": true,
+        "bProcessing": true,
+        "serverSide": true,
+        "ajax": function (data, callback, settings) {
+            callback(
+              JSON.parse(window.java.json(data.draw, data.search.value, data.order[0].column, data.order[0].dir, data.start, data.length, 
+            		  $("#inputClasificacion").val(), $("#inputEstado").val(), $("#inputCiudad").val(), $("#inputProceso").val()))
+            );
+          },
+        //"data": data,
         "columns": [
         	{
                 "className": 'details-control',
@@ -364,6 +374,7 @@ function cargarTabla(valor) {
         	},
             { "data": "cla_descripcion" },
             { "data": "est_descripcion" },
+            { "data": "ciu_descripcion" },
             { "data": "cor_descripcion" },
             { "data": null, render: function(data, type, row) {
                		return "P" + data.proceso_actual;
@@ -395,10 +406,11 @@ function verSensores() {
 function analizarCrias() {
 	var data = window.java.analizarCrias();
 	if(data > 0) {
-		table.clear().draw();
-	    table.rows.add(JSON.parse(window.java.cargarCrias(1))); // Add new data
-	    table.columns.adjust().draw(); // Redraw the DataTable
-		table.search('Apunto enfermar').draw();
+		$("#inputClasificacion").val(2);
+		$("#inputEstado").val(2);
+		$("#inputCiudad").val('ciu_id');
+		$("#inputProceso").val('proceso_actual');
+		table.ajax.reload();
 		
 		Swal.fire({
             title: 'Cuidado',
@@ -430,8 +442,7 @@ function subirProceso(rowData, rowIndex) {
             timer: 3000
         });
         
-        rowData.proceso_actual = rowData.proceso_actual + 1;
-        actualizarFila(rowData, rowIndex);
+        table.ajax.reload(null, false);
     }
     else
         Swal.fire({
@@ -454,10 +465,7 @@ function sacarCuarentena(rowData, rowIndex) {
             timer: 3000
         });
         
-        rowData.est_id = 1
-        rowData.est_descripcion = 'Actualizar página';
-        rowData.cor_descripcion = 'Actualizar página';
-        actualizarFila(rowData, rowIndex);
+        table.ajax.reload(null, false);
     }
     else
         Swal.fire({
@@ -480,10 +488,7 @@ function registrarCuarentena(rowData, rowIndex, dieta) {
             timer: 3000
         });
         
-        rowData.est_id = 3
-        rowData.est_descripcion = 'Actualizar página';
-        rowData.cor_descripcion = 'Actualizar página';
-        actualizarFila(rowData, rowIndex);
+        table.ajax.reload(null, false);
     }
     else
         Swal.fire({
@@ -525,28 +530,16 @@ function sacrificar(rowData, rowIndex, bandera) {
             timer: 3000
         });
         
-        rowData.est_id = 4
-        rowData.est_descripcion = 'Actualizar página';
-        actualizarFila(rowData, rowIndex);
+        table.ajax.reload(null, false);
     }
     else
         Swal.fire({
             title: 'Error',
-            text: "Hubo un error en la base de datos",
+            text: "Esta cria no se puede sacrificar",
             type: "error",
             animation: false,
             customClass: { popup: 'animated tada' }
         });
-}
-
-function actualizarFila(rowData, rowIndex) {
-	$("#tablaCrias").dataTable().fnUpdate(rowData, rowIndex, undefined, false);
-	
-    var trs = $("tr.shown");
-    for(var i = 0; i < trs.length; i++) {
-        var row = table.row(trs[i]);
-        row.child(formatInfo(rowData, rowIndex)).show();
-    }
 }
 
 function verLog(id) {
@@ -567,6 +560,13 @@ function verLog(id) {
 		html: html,
 		customClass: 'swal-wide'
 	})
+}
+
+function cargarLista(num, select) {
+	var elementos = JSON.parse(window.java.cargarLista(num));
+	elementos.forEach(function(elemento, index) {
+		select.append(new Option(elemento.text, elemento.value));
+	});
 }
 
 function formatInfo(d, rowIndex) {
